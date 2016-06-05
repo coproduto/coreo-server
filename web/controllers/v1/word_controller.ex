@@ -12,6 +12,7 @@ defmodule CoreoServer.V1.WordController do
 
   def create(conn, %{"word" => word_params}) do
     changeset = Word.changeset(%Word{}, word_params)
+    IO.puts "#{inspect changeset}"
 
     case Repo.insert(changeset) do
       {:ok, word} ->

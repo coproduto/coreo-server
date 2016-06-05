@@ -13,6 +13,7 @@ defmodule CoreoServer do
       supervisor(CoreoServer.Repo, []),
       # Here you could define other workers and supervisors as children
       # worker(CoreoServer.Worker, [arg1, arg2, arg3]),
+#      supervisor(CoreoServer.WordUpdater, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
