@@ -25,6 +25,8 @@ defmodule CoreoServer.Router do
 
     scope "/v1", V1, as: :v1 do
       resources "/words", WordController, except: [:edit, :new]
+      post "/words/increment/:id", WordController, :increment
+      post "/words/decrement/:id", WordController, :decrement
       resources "/new_words", NewWordController, except: [:edit, :new]
     end
   end

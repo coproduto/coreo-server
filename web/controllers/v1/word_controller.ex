@@ -46,6 +46,43 @@ defmodule CoreoServer.V1.WordController do
     end
   end
 
+  def increment(conn, %{"id" => id}) do
+    result = Repo.transaction(fn ->
+      word = Repo.get!(Word, id)
+      params = %{"votes" => word.votes + 1}
+      changeset = Word.changeset(word, params)
+
+      Repo.update!(changeset)
+    end)
+    case result do
+      {:ok, word} ->
+	render(conn, "show.json", word: word)
+      {:error, changeset} ->
+	conn
+	|> put_status(:unprocessable_entity)
+	|> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
+    end
+  end
+  
+  def decrement(conn, %{"id" => id}) do
+    result = Repo.transaction(fn ->
+      word = Repo.get!(Word, id)
+      params = %{"votes" => word.votes - 1}
+      changeset = Word.changeset(word, params)
+
+      Repo.update!(changeset)
+    end)
+    case result do
+      {:ok, word} ->
+	render(conn, "show.json", word: word)
+      {:error, changeset} ->
+	conn
+	|> put_status(:unprocessable_entity)
+	|> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
+    end
+  end
+    
+
   def delete(conn, %{"id" => id}) do
     word = Repo.get!(Word, id)
 

@@ -35,5 +35,6 @@ defmodule CoreoServer.Endpoint do
     key: "_coreo_server_key",
     signing_salt: "8ai5dvoi"
 
+  plug CORSPlug
   plug CoreoServer.Router
 end

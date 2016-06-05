@@ -32,24 +32,26 @@ defmodule CoreoServer.WordUpdater do
   def update_words(wait) do
     :timer.sleep(wait)
 
-    greatest_query = from nw in CoreoServer.NewWord,
-                  select: max(nw.votes)
+    CoreoServer.Repo.transaction(fn ->
+      greatest_query = from nw in CoreoServer.NewWord,
+      select: max(nw.votes)
 
-    greatest_value = CoreoServer.Repo.all(greatest_query)
+      greatest_value = CoreoServer.Repo.all(greatest_query)
 
-    case greatest_value do
-      [ greatest | _ ] ->
-	query = from nw in CoreoServer.NewWord,
-              where: nw.votes == ^greatest,
-	     select: nw.name
-	
-	chosen_word = CoreoServer.Repo.all(query)
+      case greatest_value do
+	[ greatest | _ ] ->
+	  query = from nw in CoreoServer.NewWord,
+          where: nw.votes == ^greatest,
+	  select: nw.name
+	  
+	  chosen_word = CoreoServer.Repo.all(query)
 
-	add_to_words(chosen_word)
+	  add_to_words(chosen_word)
 
-      _ ->
-	:no_op
-    end
+	_ ->
+	  :no_op
+      end
+    end)
   end
 
   def add_to_words(word?) do
@@ -57,7 +59,7 @@ defmodule CoreoServer.WordUpdater do
       [ word | _ ] ->
 	params = %{"name" => word, "votes" => 0}
 	changeset = Word.changeset(%Word{}, params)
-	result = CoreoServer.Repo.insert(changeset)
+	result = CoreoServer.Repo.insert!(changeset)
 
       _ -> 
 	:no_op
