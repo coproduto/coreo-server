@@ -20,7 +20,12 @@ defmodule CoreoServer.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", CoreoServer do
-  #   pipe_through :api
-  # end
+  scope "/api", CoreoServer do
+    pipe_through :api
+
+    scope "/v1", V1, as: :v1 do
+      resources "/words", WordController, except: [:edit, :new]
+      resources "/new_words", NewWordController, except: [:edit, :new]
+    end
+  end
 end

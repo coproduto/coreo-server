@@ -1,8 +1,8 @@
 defmodule CoreoServer.PageControllerTest do
   use CoreoServer.ConnCase
 
-  test "GET /", %{conn: conn} do
+  test "Has elm-container", %{conn: conn} do
     conn = get conn, "/"
-    assert html_response(conn, 200) =~ "Welcome to Phoenix!"
+    assert html_response(conn, 200) =~ "elm-container"
   end
 end
