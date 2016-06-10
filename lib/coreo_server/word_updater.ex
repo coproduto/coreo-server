@@ -39,7 +39,7 @@ defmodule CoreoServer.WordUpdater do
       greatest_value = CoreoServer.Repo.all(greatest_query)
 
       case greatest_value do
-	[ greatest | _ ] ->
+	[ greatest | _ ] when greatest != nil ->
 	  query = from nw in CoreoServer.NewWord,
           where: nw.votes == ^greatest,
 	  select: nw.name
