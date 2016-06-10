@@ -3,6 +3,7 @@ defmodule CoreoServer.UserSocket do
 
   ## Channels
   # channel "rooms:*", CoreoServer.RoomChannel
+  channel "updates:*", CoreoServer.UpdateChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

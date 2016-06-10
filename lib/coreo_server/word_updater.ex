@@ -8,7 +8,7 @@ defmodule CoreoServer.WordUpdater do
   import Ecto.Changeset
   import Ecto.Query
 
-  @interval 5000
+  @interval 30000
 
   def start_link do
     IO.puts "Word updater started!"
@@ -32,7 +32,7 @@ defmodule CoreoServer.WordUpdater do
   def update_words(wait) do
     :timer.sleep(wait)
 
-    CoreoServer.Repo.transaction(fn ->
+    result = CoreoServer.Repo.transaction(fn ->
       greatest_query = from nw in CoreoServer.NewWord,
       select: max(nw.votes)
 
@@ -52,6 +52,15 @@ defmodule CoreoServer.WordUpdater do
 	  :no_op
       end
     end)
+
+    case result do
+      {:ok, word} ->
+	CoreoServer.UpdateChannel.broadcast_all_invalidate
+      {:error, changeset} ->
+	IO.puts "Word update failed with changeset #{changeset}"
+      :no_op ->
+	IO.puts "Word update: No op"
+    end
   end
 
   def add_to_words(word?) do
@@ -59,7 +68,7 @@ defmodule CoreoServer.WordUpdater do
       [ word | _ ] ->
 	params = %{"name" => word, "votes" => 0}
 	changeset = Word.changeset(%Word{}, params)
-	result = CoreoServer.Repo.insert!(changeset)
+	CoreoServer.Repo.insert!(changeset)
 
       _ -> 
 	:no_op

@@ -12,10 +12,11 @@ defmodule CoreoServer.V1.WordController do
 
   def create(conn, %{"word" => word_params}) do
     changeset = Word.changeset(%Word{}, word_params)
-    IO.puts "#{inspect changeset}"
 
     case Repo.insert(changeset) do
       {:ok, word} ->
+	CoreoServer.UpdateChannel.broadcast_words_invalidate
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", v1_word_path(conn, :show, word))
@@ -56,6 +57,7 @@ defmodule CoreoServer.V1.WordController do
     end)
     case result do
       {:ok, word} ->
+	CoreoServer.UpdateChannel.broadcast_word(word)
 	render(conn, "show.json", word: word)
       {:error, changeset} ->
 	conn
@@ -74,6 +76,7 @@ defmodule CoreoServer.V1.WordController do
     end)
     case result do
       {:ok, word} ->
+	CoreoServer.UpdateChannel.broadcast_word(word)
 	render(conn, "show.json", word: word)
       {:error, changeset} ->
 	conn

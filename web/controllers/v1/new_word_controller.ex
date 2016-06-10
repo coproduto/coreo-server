@@ -15,6 +15,8 @@ defmodule CoreoServer.V1.NewWordController do
 
     case Repo.insert(changeset) do
       {:ok, new_word} ->
+	CoreoServer.UpdateChannel.broadcast_new_words_invalidate
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", v1_new_word_path(conn, :show, new_word))
@@ -37,11 +39,50 @@ defmodule CoreoServer.V1.NewWordController do
 
     case Repo.update(changeset) do
       {:ok, new_word} ->
+	CoreoServer.UpdateChannel.broadcast_new_word(new_word)
         render(conn, "show.json", new_word: new_word)
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
         |> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
+    end
+  end
+
+  def increment(conn, %{"id" => id}) do
+    result = Repo.transaction(fn ->
+      new_word = Repo.get!(NewWord, id)
+      params = %{"votes" => new_word.votes + 1}
+      changeset = NewWord.changeset(new_word, params)
+
+      Repo.update!(changeset)
+    end)
+    case result do
+      {:ok, new_word} ->
+	CoreoServer.UpdateChannel.broadcast_new_word(new_word)
+	render(conn, "show.json", new_word: new_word)
+      {:error, changeset} ->
+	conn
+	|> put_status(:unprocessable_entity)
+	|> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
+    end
+  end
+  
+  def decrement(conn, %{"id" => id}) do
+    result = Repo.transaction(fn ->
+      new_word = Repo.get!(NewWord, id)
+      params = %{"votes" => new_word.votes - 1}
+      changeset = NewWord.changeset(new_word, params)
+
+      Repo.update!(changeset)
+    end)
+    case result do
+      {:ok, new_word} ->
+	CoreoServer.UpdateChannel.broadcast_new_word(new_word)
+	render(conn, "show.json", new_word: new_word)
+      {:error, changeset} ->
+	conn
+	|> put_status(:unprocessable_entity)
+	|> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
     end
   end
 
