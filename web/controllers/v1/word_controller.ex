@@ -95,4 +95,17 @@ defmodule CoreoServer.V1.WordController do
 
     send_resp(conn, :no_content, "")
   end
+
+
+  def reset_votes(conn, _params) do
+    result = Repo.transaction(fn ->
+      Repo.update_all(Word, set: [votes: 0])
+    end)
+    case result do
+      {rows, _return} ->
+	CoreoServer.UpdateChannel.broadcast_words_invalidate
+	words = Repo.all(Word)
+	render(conn, "index.json", words: words)
+    end
+  end
 end

@@ -27,10 +27,14 @@ defmodule CoreoServer.Router do
       resources "/words", WordController, except: [:edit, :new]
       post "/words/increment/:id", WordController, :increment
       post "/words/decrement/:id", WordController, :decrement
+      post "/words/reset", WordController, :reset_votes
 
       resources "/new_words", NewWordController, except: [:edit, :new]
       post "/new_words/increment/:id", NewWordController, :increment
       post "/new_words/decrement/:id", NewWordController, :decrement
+      post "/new_words/reset", NewWordController, :reset_votes
+
+      post "/admin/lock_new_words", AdminController, :lock_new_words
     end
   end
 end

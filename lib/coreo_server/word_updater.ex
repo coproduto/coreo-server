@@ -31,35 +31,39 @@ defmodule CoreoServer.WordUpdater do
   #Clear all votes
   def update_words(wait) do
     :timer.sleep(wait)
+    
+    {_, is_locked} = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_new_words)
 
-    result = CoreoServer.Repo.transaction(fn ->
-      greatest_query = from nw in CoreoServer.NewWord,
-      select: max(nw.votes)
+    if not is_locked do
+      result = CoreoServer.Repo.transaction(fn ->
+	greatest_query = from nw in CoreoServer.NewWord,
+	select: max(nw.votes)
 
-      greatest_value = CoreoServer.Repo.all(greatest_query)
+	greatest_value = CoreoServer.Repo.all(greatest_query)
 
-      case greatest_value do
-	[ greatest | _ ] when greatest != nil ->
-	  query = from nw in CoreoServer.NewWord,
-          where: nw.votes == ^greatest,
-	  select: nw.name
-	  
-	  chosen_word = CoreoServer.Repo.all(query)
+	case greatest_value do
+	  [ greatest | _ ] when greatest != nil ->
+	    query = from nw in CoreoServer.NewWord,
+            where: nw.votes == ^greatest,
+	    select: nw.name
+	    
+	    chosen_word = CoreoServer.Repo.all(query)
 
-	  add_to_words(chosen_word)
+	    add_to_words(chosen_word)
 
-	_ ->
-	  :no_op
+	  _ ->
+	    :no_op
+	end
+      end)
+
+      case result do
+	{:ok, word} ->
+	  CoreoServer.UpdateChannel.broadcast_all_invalidate
+	{:error, changeset} ->
+	  IO.puts "Word update failed with changeset #{changeset}"
+	:no_op ->
+	  IO.puts "Word update: No op"
       end
-    end)
-
-    case result do
-      {:ok, word} ->
-	CoreoServer.UpdateChannel.broadcast_all_invalidate
-      {:error, changeset} ->
-	IO.puts "Word update failed with changeset #{changeset}"
-      :no_op ->
-	IO.puts "Word update: No op"
     end
   end
 

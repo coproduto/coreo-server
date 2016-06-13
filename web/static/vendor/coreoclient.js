@@ -9878,9 +9878,9 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$view = function (model) {
 			]));
 };
 
-var _pcstl$coreo_client$CoreoClient$socketUrl = 'ws://localhost:4000/socket/websocket';
-var _pcstl$coreo_client$CoreoClient$newWordsUrl = 'http://localhost:4000/api/v1/new_words/';
-var _pcstl$coreo_client$CoreoClient$wordsUrl = 'http://localhost:4000/api/v1/words/';
+var _pcstl$coreo_client$CoreoClient$socketUrl = 'wss://salty-sierra-37096.herokuapp.com/socket/websocket';
+var _pcstl$coreo_client$CoreoClient$newWordsUrl = 'https://salty-sierra-37096.herokuapp.com/api/v1/new_words/';
+var _pcstl$coreo_client$CoreoClient$wordsUrl = 'https://salty-sierra-37096.herokuapp.com/api/v1/words/';
 var _pcstl$coreo_client$CoreoClient$Model = F5(
 	function (a, b, c, d, e) {
 		return {voteList: a, newWordList: b, socket: c, socketUrl: d, updatesChannel: e};
