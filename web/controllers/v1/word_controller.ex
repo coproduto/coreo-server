@@ -92,6 +92,7 @@ defmodule CoreoServer.V1.WordController do
     # Here we use delete! (with a bang) because we expect
     # it to always work (and if it does not, it will raise).
     Repo.delete!(word)
+    CoreoServer.UpdateChannel.broadcast_words_invalidate
 
     send_resp(conn, :no_content, "")
   end
