@@ -14,4 +14,8 @@ defmodule CoreoServer.V1.NewWordView do
       name: new_word.name,
       votes: new_word.votes}
   end
+
+  def render("error.json", %{error: error}) do
+    %{error: error}
+  end
 end

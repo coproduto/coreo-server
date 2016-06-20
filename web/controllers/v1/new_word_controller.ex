@@ -11,20 +11,26 @@ defmodule CoreoServer.V1.NewWordController do
   end
 
   def create(conn, %{"new_word" => new_word_params}) do
-    changeset = NewWord.changeset(%NewWord{}, new_word_params)
+    {_, is_locked} = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_new_words)
 
-    case Repo.insert(changeset) do
-      {:ok, new_word} ->
-	CoreoServer.UpdateChannel.broadcast_new_words_invalidate
+    if not is_locked do
+      changeset = NewWord.changeset(%NewWord{}, new_word_params)
 
-        conn
-        |> put_status(:created)
-        |> put_resp_header("location", v1_new_word_path(conn, :show, new_word))
-        |> render("show.json", new_word: new_word)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
+      case Repo.insert(changeset) do
+	{:ok, new_word} ->
+	  CoreoServer.UpdateChannel.broadcast_new_words_invalidate
+
+          conn
+          |> put_status(:created)
+          |> put_resp_header("location", v1_new_word_path(conn, :show, new_word))
+          |> render("show.json", new_word: new_word)
+	{:error, changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> render(CoreoServer.ChangesetView, "error.json", changeset: changeset)
+      end
+    else
+      render(conn, "error.json", error: "403 Forbidden")
     end
   end
 
