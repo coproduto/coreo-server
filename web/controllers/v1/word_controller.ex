@@ -104,7 +104,7 @@ defmodule CoreoServer.V1.WordController do
     end)
     case result do
       {rows, _return} ->
-	CoreoServer.UpdateChannel.broadcast_words_invalidate
+	CoreoServer.UpdateChannel.broadcast_words_invalidate(true)
 	words = Repo.all(Word)
 	render(conn, "index.json", words: words)
     end
