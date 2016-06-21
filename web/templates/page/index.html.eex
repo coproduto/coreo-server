@@ -1,1 +1,2 @@
+<img src="<%= static_path(@conn, "/images/placeholder.png") %>" alt="Stream">
 <div id="elm-container"></div>

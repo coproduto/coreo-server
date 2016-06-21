@@ -64,6 +64,9 @@ defmodule CoreoServer.WordUpdater do
 	:no_op ->
 	  IO.puts "Word update: No op"
       end
+    else
+      #this is a kludge to minimize desynchronization problems
+      CoreoServer.UpdateChannel.broadcast_all_invalidate
     end
   end
 
