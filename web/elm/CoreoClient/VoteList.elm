@@ -85,9 +85,10 @@ wordImages =
     , ("Leve", "/images/leve.png")
     , ("Rápido", "/images/rapido.png")
     , ("Volta", "/images/volta.png")
-    , ("Pause", "/images/pause.png")
-    , ("Livre", "/images/livre.png")
+    , ("Pausa", "/images/pause.png")
+    , ("Fluido", "/images/livre.png")
     , ("Contido", "/images/contido.png")
+    , ("Lento", "/images/lento.png")
     ]
 
 {-| Initialize the voteList. It takes a list of strings representing
