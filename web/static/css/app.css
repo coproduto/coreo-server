@@ -76,3 +76,8 @@ form.link, form.button {
     border-bottom: 0;
   }
 }
+
+body {
+    background-image: url("/images/background.png");
+    color: #FFFFFF;
+}
