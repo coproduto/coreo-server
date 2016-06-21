@@ -73,8 +73,9 @@ specialWords =
   , "Lento"
   , "Rápido"
   , "Volta"
-  , "Pause"
+  , "Pausa"
   , "Livre"
+  , "Fluido"
   , "Contido"
   ]
 
