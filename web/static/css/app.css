@@ -77,6 +77,69 @@ form.link, form.button {
   }
 }
 
+.list-group > li {
+    background: none;
+    border: none;
+}
+
+.vote-item {
+    font-size: 18px;
+}
+
+.btn-primary {
+    background-color: #e2e2e2;
+    color: #000000;
+}
+
+.btn-primary.disabled,
+.btn-primary.disabled:focus,
+.btn-primary.disabled:hover {
+    color: #000000;
+    background-color: #e2e2e2;
+    opacity: 0.5;
+}
+
+.btn-primary:hover { 
+    background-color: #f2f2f2;
+    color: #007fe2;
+}
+
+.btn-primary-outline {
+    background: none;
+}
+
+.btn-primary-outline .disabled {
+    opacity: 0.5;
+}
+
+.btn-primary-outline:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.btn-secondary {
+    color: #000000;
+}
+
+.btn-secondary.disabled,
+.btn-secondary.disabled:focus,
+.btn-secondary.disabled:hover {
+    color: #000000;
+}
+
+.btn-secondary:hover { 
+    background: #e2e2e2;
+    color: #007fe2;
+}
+
+.vote-item { 
+    text-align: center;
+}
+
+.form-inline {
+    text-align: center;
+    color: #000000;
+}
+
 body {
     background-image: url("/images/background.png");
     color: #FFFFFF;

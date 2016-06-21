@@ -1,4 +1,4 @@
-module CoreoClient.NewWordList exposing (Model, Msg(FetchList, NewWordUpdate), update, view, init, subscriptions)
+module CoreoClient.NewWordList exposing (Model, Msg(FetchList, ResetFetchList, NewWordUpdate), update, view, init, subscriptions)
 {-| Module allowing users to vote for a new word to be added 
 to the voting list. Functions quite similarly to the voting
 list itself.
@@ -21,6 +21,7 @@ import Html.Events as Events
 import Http
 import Task exposing (Task)
 
+import String
 import Result exposing (Result)
 import Json.Decode as Decode exposing (Decoder,(:=))
 import Json.Encode as Json
@@ -49,7 +50,10 @@ or it can represent the creation of a new option.
 type Msg 
   = VoteForOption Int
   | FetchList
+  | ResetFetchList
   | CreateOption String
+  | CreateOptionFail Http.Error
+  | CreateOptionSucceed NewWordVotes
   | NewContent String
   | UpdateListFail Http.Error
   | UpdateListSucceed (List NewWordVotes)
@@ -106,6 +110,12 @@ update message model =
     FetchList ->
       ( model
       , Task.perform UpdateListFail UpdateListSucceed 
+          (Http.get (decodeNewWordList model.votes) model.url)
+      )
+
+    ResetFetchList ->
+      ( model
+      , Task.perform UpdateListFail UpdateListSucceed 
           (Http.get (decodeNewWordList []) model.url)
       )
 
@@ -131,13 +141,47 @@ update message model =
 
     CreateOption str ->
       let options = List.map .name model.votes
-      in if str `List.member` options then
+
+          payload = Json.encode 1
+                     <| Json.object
+                          [ ("new_word"
+                            , Json.object
+                                 [ ("name",  (Json.string str))
+                                 , ("votes", (Json.int 0))
+                                 ]
+                            )
+                          ]
+      in if (str `List.member` options) || ((String.length str) == 0) then
            ( model
            , Cmd.none)
          else 
-           ({ model | votes = (NewWordVotes 99 str 1 True)  :: model.votes 
-                    , fieldContent = ""
-            }, Cmd.none)
+           let httpRequest = Http.send Http.defaultSettings
+                             { verb = "POST"
+                             , headers = [("Accept", "application/json")
+                                         ,("Content-Type", "application/json")
+                                         ]
+                             , url = model.url
+                             , body = Http.string payload
+                             }
+
+           in 
+             ( model
+             , Task.perform CreateOptionFail CreateOptionSucceed 
+                 (Http.fromJson (decodeNewWordResponse []) httpRequest)
+             )
+                                  
+
+    CreateOptionFail err ->
+      (Debug.log ("got err " ++ (toString err)) model
+      , Cmd.none
+      )
+
+    CreateOptionSucceed newOption ->
+      ({ model | votes = newOption :: model.votes
+               , fieldContent = ""
+       }
+      , Cmd.none
+      )
 
     NewContent str ->
       ({ model | fieldContent = str }, Cmd.none)
@@ -153,7 +197,6 @@ update message model =
        }
        , Cmd.none
       )
-
 
     IncrementFail err ->
       (Debug.log ("got err " ++ (toString err)) model
@@ -211,17 +254,27 @@ update message model =
 view : Model -> Html Msg
 view model =
   H.div []
-   [ voteList model.votes 
-   , H.input 
-       [ Attr.placeholder "Crie uma opção"
-       , Events.onInput NewContent
-       , Attr.value model.fieldContent
-       ] []
-   , H.button 
-      [ Attr.type' "button"
-      , Events.onClick (CreateOption model.fieldContent) 
-      ]
-      [ H.text "Confirmar opção" ]
+   [ H.div 
+       [ Attr.class "center-block" ]
+       [ H.form
+           [ Attr.class "form-inline" ]
+           [ H.div 
+               [ Attr.class "form-group" ]
+               [ H.input 
+                   [ Attr.placeholder "Crie uma opção"
+                   , Events.onInput NewContent
+                   , Attr.value model.fieldContent
+                   ] []
+               , H.button 
+                   [ Attr.type' "button"
+                   , Attr.class "btn btn-secondary"
+                   , Events.onClick (CreateOption model.fieldContent) 
+                   ]
+                   [ H.text "Confirmar opção" ]
+               ]
+           ]
+       ]
+   , voteList model.votes 
    ]
 
 subscriptions : Model -> Sub Msg
@@ -262,18 +315,32 @@ toggleAndModify vote =
 
 voteList : List NewWordVotes -> Html Msg
 voteList nvList =
-  H.ul [] (List.map listElem nvList)
+  let list = List.map listElem nvList
+  in H.ul 
+       [ Attr.class "list-group row vote-list" ]
+       list
 
 listElem : NewWordVotes -> Html Msg
 listElem vote =
   let voteText = if vote.voted then "+1"
                  else "0"
   in 
-    H.li []
+    H.li 
+       [ Attr.class "list-group-item clearfix vote-item col-xs-6" ]
        [ H.text (vote.name ++ ":" ++ voteText)
-       , H.button
-          [ Events.onClick (VoteForOption vote.id) ]
-          [ H.text "Vote" ]
+       , H.span
+          [ Attr.class "pull-right" ]
+          [ H.button
+              [ Attr.class "btn btn-primary"
+              , Attr.type' "button"
+              , Events.onClick (VoteForOption vote.id) 
+              ]
+              (if vote.voted then
+                 [ H.text "Desfazer voto" ]
+               else
+                 [ H.text "Vote" ]
+              )
+          ]
        ]
 
 --decoders for JSON data

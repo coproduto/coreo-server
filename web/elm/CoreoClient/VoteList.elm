@@ -1,4 +1,4 @@
-module CoreoClient.VoteList exposing (Model, Msg(FetchList, WordUpdate), update, view, init, subscriptions)
+module CoreoClient.VoteList exposing (Model, Msg(FetchList, ResetFetchList, WordUpdate), update, view, init, subscriptions)
 {-| Module to generate a list of votes,
 consisting of each votable option together
 with the number of votes associated with it.
@@ -22,6 +22,8 @@ import Http
 import Task exposing (Task)
 
 import Result exposing (Result)
+import Dict exposing (Dict)
+import Maybe exposing (Maybe)
 import Json.Decode as Decode exposing (Decoder,(:=))
 import Json.Encode as Json
 
@@ -46,8 +48,10 @@ string identifying which option was voted for.
 -}
 type Msg = VoteForOption Int
          | FetchList
+         | ResetFetchList
          | UpdateListFail Http.Error
          | UpdateListSucceed (List Votes)
+         | UpdateListResetSucceed (List Votes)
          | IncrementFail Http.Error
          | IncrementSucceed Votes
          | DecrementFail Http.Error
@@ -62,34 +66,44 @@ type alias Votes =
   , votes: Int 
   }
 
+specialWords : List String
+specialWords = 
+  [ "Forte"
+  , "Leve"
+  , "Lento"
+  , "Rápido"
+  , "Volta"
+  , "Pause"
+  , "Livre"
+  , "Contido"
+  ]
+
+wordImages : Dict String String
+wordImages = 
+  Dict.fromList
+    [ ("Forte", "/images/forte.png")
+    , ("Leve", "/images/leve.png")
+    , ("Rápido", "/images/rapido.png")
+    , ("Volta", "/images/volta.png")
+    , ("Pause", "/images/pause.png")
+    , ("Livre", "/images/livre.png")
+    , ("Contido", "/images/contido.png")
+    ]
+
 {-| Initialize the voteList. It takes a list of strings representing
 the possible voting options as a parameter. 
 -}
 init : String -> (Model, Cmd Msg)
 init url {-socketUrl-} = 
   let 
-{-      initSocket = Phoenix.Socket.init socketUrl
-        |> Phoenix.Socket.withDebug
-        |> Phoenix.Socket.on "update:word" "updates:lobby" WordUpdate
-
-      channel = Phoenix.Channel.init "updates:lobby"
-              |> Phoenix.Channel.withPayload (Json.string "")
-              |> Phoenix.Channel.onJoin FetchList
-
-      (socket, phxCmd) = Phoenix.Socket.join channel initSocket-}
-
       initModel = 
         { votes = []
         , votedForOption = Nothing
         , url = url
-{-        , socket = socket
-        , socketUrl = socketUrl-}
         }
 
       initCmds =
-        Cmd.none{-batch
-          [ Cmd.map PhoenixMsg phxCmd
-          ]-}
+        Cmd.none
   in
   ( initModel 
   , initCmds
@@ -103,6 +117,12 @@ update message model =
     FetchList ->
       ( model
       , Task.perform UpdateListFail UpdateListSucceed 
+              (Http.get decodeVoteList model.url)
+      )
+
+    ResetFetchList ->
+      ( model
+      , Task.perform UpdateListFail UpdateListResetSucceed 
               (Http.get decodeVoteList model.url)
       )
 
@@ -132,7 +152,15 @@ update message model =
 
     UpdateListSucceed vList ->
       (Debug.log ("got vList " ++ (toString vList))
+       { model | votes = vList 
+       }
+       , Cmd.none
+      )
+
+    UpdateListResetSucceed vList ->
+      (Debug.log ("got vList " ++ (toString vList))
        { model | votes = vList
+               , votedForOption = Nothing
        }
        , Cmd.none
       )
@@ -193,7 +221,7 @@ button. -}
 view : Model -> Html Msg
 view model = 
   H.div []
-     [ voteList (List.sortBy (\a -> negate a.votes) model.votes) ]
+     [ voteList model (List.sortBy (\a -> negate a.votes) model.votes) ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -201,20 +229,72 @@ subscriptions model =
     Sub.none
       
 --helper functions
-voteList : List Votes -> Html Msg
-voteList vList =
+voteList : Model -> List Votes -> Html Msg
+voteList model vList =
   let list =
-    List.map listElem vList
-  in H.ul [] list
+    List.map (listElem model) vList
+  in H.ul 
+       [ Attr.class "list-group row vote-list" ] 
+       list
 
-listElem : Votes -> Html Msg
-listElem vote =
-  H.li []
-     [ H.text (vote.name ++ ":" ++ (toString vote.votes))
-     , H.button
-         [ Events.onClick (VoteForOption vote.id) ]
-         [ H.text "Vote" ] 
-     ]
+listElem : Model -> Votes -> Html Msg
+listElem model vote =
+  let hasVotedForThis = case model.votedForOption of
+                          Just id ->
+                            (id == vote.id)
+                          Nothing ->
+                            False
+
+      hasVoted = case model.votedForOption of
+                   Just _  -> True
+                   Nothing -> False
+
+      wordImg = Maybe.withDefault "" <| Dict.get vote.name wordImages
+
+  in if not <| vote.name `List.member` specialWords
+    then
+       H.li 
+          [ Attr.class "list-group-item clearfix vote-item col-xs-6" ]
+            [ H.text (vote.name ++ " : " ++ (toString vote.votes))
+            , H.span 
+                [ Attr.class "pull-right" ]
+                [ H.button
+                    [ (if (hasVotedForThis || (not hasVoted)) then
+                         Attr.class "btn btn-primary"
+                       else
+                         Attr.class "btn btn-primary disabled"
+                      )
+                    , Attr.type' "button"
+                    , Events.onClick (VoteForOption vote.id) 
+                    ]
+                    (if hasVotedForThis then
+                       [ H.text "Desfazer voto" ]
+                     else
+                       [ H.text "Vote" ]
+                    )
+                ]
+            ]
+    else
+      H.li
+         [ Attr.class "list-group-item vote-item col-xs-6" ]
+         [ H.button 
+             [ (if (hasVotedForThis || (not hasVoted)) then
+                  Attr.class "btn btn-primary-outline"
+                else
+                  Attr.class "btn btn-primary-outline disabled"
+               )
+             , Attr.type' "button"
+             , Events.onClick (VoteForOption vote.id) 
+             ]
+             [ H.img 
+                 [ Attr.src wordImg
+                 , Attr.alt vote.name
+                 , Attr.class "img-responsive"
+                 ] []
+             ]
+         , H.text (" : " ++ (toString vote.votes))
+         ]
+
 
 dispatchAction : (Int -> Int) -> Int -> List Votes -> List Votes
 dispatchAction action target list =

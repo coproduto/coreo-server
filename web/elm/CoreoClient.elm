@@ -23,13 +23,13 @@ import Time
 
 --url for the words API
 wordsUrl : String
-wordsUrl = "https://salty-sierra-37096.herokuapp.com/api/v1/words/"
+wordsUrl = "http://localhost:4000/api/v1/words/"
 
 newWordsUrl : String
-newWordsUrl = "https://salty-sierra-37096.herokuapp.com/api/v1/new_words/"
+newWordsUrl = "http://localhost:4000/api/v1/new_words/"
 
 socketUrl : String
-socketUrl = "wss://salty-sierra-37096.herokuapp.com/socket/websocket"
+socketUrl = "ws://localhost:4000/socket/websocket"
 
 {-| main: Start the client.
 -}
@@ -56,6 +56,10 @@ type Msg
     | WordUpdate Json.Value
     | NewWordUpdate Json.Value
     | FetchLists Json.Value
+    | FetchNewWords Json.Value
+    | ResetFetchNewWords Json.Value
+    | FetchWords Json.Value
+    | ResetFetchWords Json.Value
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
     | RejoinChannel Json.Value
     | Ping
@@ -71,6 +75,10 @@ init =
                  |> Phoenix.Socket.on "update:word" "updates:lobby" WordUpdate
                  |> Phoenix.Socket.on "update:new_word" "updates:lobby" NewWordUpdate
                  |> Phoenix.Socket.on "update:invalidate_all" "updates:lobby" FetchLists
+                 |> Phoenix.Socket.on "update:invalidate_words" "updates:lobby" FetchWords
+                 |> Phoenix.Socket.on "update:invalidate_words_votes" "updates:lobby" ResetFetchWords
+                 |> Phoenix.Socket.on "update:invalidate_new_words" "updates:lobby" FetchNewWords
+                 |> Phoenix.Socket.on "update:invalidate_new_words_votes" "updates:lobby" ResetFetchNewWords
 
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
@@ -117,6 +125,46 @@ update message model =
             ]
         )
 
+    FetchNewWords _ ->
+      let (newWordList, wordListCmd) = NewWordList.update NewWordList.FetchList model.newWordList
+      in 
+        ( { model | newWordList = newWordList 
+          }
+        , Cmd.batch
+            [ Cmd.map NewWordMsg wordListCmd
+            ]
+        )
+
+    FetchWords _ ->
+      let (newVoteList, voteListCmd) = VoteList.update VoteList.FetchList model.voteList
+      in 
+        ( { model | voteList = newVoteList
+          }
+        , Cmd.batch
+            [ Cmd.map VoteMsg voteListCmd
+            ]
+        )
+
+    ResetFetchNewWords _ ->
+      let (newWordList, wordListCmd) = NewWordList.update NewWordList.ResetFetchList model.newWordList
+      in 
+        ( { model | newWordList = newWordList 
+          }
+        , Cmd.batch
+            [ Cmd.map NewWordMsg wordListCmd
+            ]
+        )
+
+    ResetFetchWords _ ->
+      let (newVoteList, voteListCmd) = VoteList.update VoteList.ResetFetchList model.voteList
+      in 
+        ( { model | voteList = newVoteList 
+          }
+        , Cmd.batch
+            [ Cmd.map VoteMsg voteListCmd
+            ]
+        ) 
+
     WordUpdate json ->
       let (newVoteList, voteListCmd) = VoteList.update (VoteList.WordUpdate json) model.voteList
       in 
@@ -154,6 +202,7 @@ view : Model -> Html Msg
 view model = 
     H.div []
          [ App.map VoteMsg <| VoteList.view model.voteList
+         , H.hr [] []
          , App.map NewWordMsg <| NewWordList.view model.newWordList
          ]
 

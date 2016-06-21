@@ -9160,6 +9160,19 @@ var _pcstl$coreo_client$CoreoClient_VoteList$init = function (url) {
 	};
 	return {ctor: '_Tuple2', _0: initModel, _1: initCmds};
 };
+var _pcstl$coreo_client$CoreoClient_VoteList$wordImages = _elm_lang$core$Dict$fromList(
+	_elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: 'Forte', _1: '/images/forte.png'},
+			{ctor: '_Tuple2', _0: 'Leve', _1: '/images/leve.png'},
+			{ctor: '_Tuple2', _0: 'Rápido', _1: '/images/rapido.png'},
+			{ctor: '_Tuple2', _0: 'Volta', _1: '/images/volta.png'},
+			{ctor: '_Tuple2', _0: 'Pause', _1: '/images/pause.png'},
+			{ctor: '_Tuple2', _0: 'Livre', _1: '/images/livre.png'},
+			{ctor: '_Tuple2', _0: 'Contido', _1: '/images/contido.png'}
+		]));
+var _pcstl$coreo_client$CoreoClient_VoteList$specialWords = _elm_lang$core$Native_List.fromArray(
+	['Forte', 'Leve', 'Lento', 'Rápido', 'Volta', 'Pause', 'Livre', 'Contido']);
 var _pcstl$coreo_client$CoreoClient_VoteList$Model = F3(
 	function (a, b, c) {
 		return {votes: a, votedForOption: b, url: c};
@@ -9195,6 +9208,9 @@ var _pcstl$coreo_client$CoreoClient_VoteList$IncrementSucceed = function (a) {
 var _pcstl$coreo_client$CoreoClient_VoteList$IncrementFail = function (a) {
 	return {ctor: 'IncrementFail', _0: a};
 };
+var _pcstl$coreo_client$CoreoClient_VoteList$UpdateListResetSucceed = function (a) {
+	return {ctor: 'UpdateListResetSucceed', _0: a};
+};
 var _pcstl$coreo_client$CoreoClient_VoteList$UpdateListSucceed = function (a) {
 	return {ctor: 'UpdateListSucceed', _0: a};
 };
@@ -9213,6 +9229,16 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 						_elm_lang$core$Task$perform,
 						_pcstl$coreo_client$CoreoClient_VoteList$UpdateListFail,
 						_pcstl$coreo_client$CoreoClient_VoteList$UpdateListSucceed,
+						A2(_evancz$elm_http$Http$get, _pcstl$coreo_client$CoreoClient_VoteList$decodeVoteList, model.url))
+				};
+			case 'ResetFetchList':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A3(
+						_elm_lang$core$Task$perform,
+						_pcstl$coreo_client$CoreoClient_VoteList$UpdateListFail,
+						_pcstl$coreo_client$CoreoClient_VoteList$UpdateListResetSucceed,
 						A2(_evancz$elm_http$Http$get, _pcstl$coreo_client$CoreoClient_VoteList$decodeVoteList, model.url))
 				};
 			case 'VoteForOption':
@@ -9286,6 +9312,21 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 							{votes: _p6})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'UpdateListResetSucceed':
+				var _p7 = _p3._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_elm_lang$core$Debug$log,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'got vList ',
+							_elm_lang$core$Basics$toString(_p7)),
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{votes: _p7, votedForOption: _elm_lang$core$Maybe$Nothing})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'IncrementFail':
 				return {
 					ctor: '_Tuple2',
@@ -9299,14 +9340,14 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'IncrementSucceed':
-				var _p7 = _p3._0;
+				var _p8 = _p3._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							votes: A3(_pcstl$coreo_client$CoreoClient_VoteList$dispatchAction, _pcstl$coreo_client$CoreoClient_VoteList$increment, _p7.id, model.votes),
-							votedForOption: _elm_lang$core$Maybe$Just(_p7.id)
+							votes: A3(_pcstl$coreo_client$CoreoClient_VoteList$dispatchAction, _pcstl$coreo_client$CoreoClient_VoteList$increment, _p8.id, model.votes),
+							votedForOption: _elm_lang$core$Maybe$Just(_p8.id)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -9335,9 +9376,9 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 				};
 			case 'WordUpdate':
 				var data = A2(_elm_lang$core$Json_Decode$decodeValue, _pcstl$coreo_client$CoreoClient_VoteList$decodeVote, _p3._0);
-				var _p8 = data;
-				if (_p8.ctor === 'Ok') {
-					var _p9 = _p8._0;
+				var _p9 = data;
+				if (_p9.ctor === 'Ok') {
+					var _p10 = _p9._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -9345,8 +9386,8 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 							{
 								votes: A3(
 									_pcstl$coreo_client$CoreoClient_VoteList$dispatchAction,
-									_elm_lang$core$Basics$always(_p9.votes),
-									_p9.id,
+									_elm_lang$core$Basics$always(_p10.votes),
+									_p10.id,
 									model.votes)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
@@ -9356,7 +9397,7 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 						ctor: '_Tuple2',
 						_0: A2(
 							_elm_lang$core$Debug$log,
-							A2(_elm_lang$core$Basics_ops['++'], 'got err ', _p8._0),
+							A2(_elm_lang$core$Basics_ops['++'], 'got err ', _p9._0),
 							model),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -9365,46 +9406,126 @@ var _pcstl$coreo_client$CoreoClient_VoteList$update = F2(
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
+var _pcstl$coreo_client$CoreoClient_VoteList$ResetFetchList = {ctor: 'ResetFetchList'};
 var _pcstl$coreo_client$CoreoClient_VoteList$FetchList = {ctor: 'FetchList'};
 var _pcstl$coreo_client$CoreoClient_VoteList$VoteForOption = function (a) {
 	return {ctor: 'VoteForOption', _0: a};
 };
-var _pcstl$coreo_client$CoreoClient_VoteList$listElem = function (vote) {
-	return A2(
-		_elm_lang$html$Html$li,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html$text(
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					vote.name,
+var _pcstl$coreo_client$CoreoClient_VoteList$listElem = F2(
+	function (model, vote) {
+		var wordImg = A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			A2(_elm_lang$core$Dict$get, vote.name, _pcstl$coreo_client$CoreoClient_VoteList$wordImages));
+		var hasVoted = function () {
+			var _p11 = model.votedForOption;
+			if (_p11.ctor === 'Just') {
+				return true;
+			} else {
+				return false;
+			}
+		}();
+		var hasVotedForThis = function () {
+			var _p12 = model.votedForOption;
+			if (_p12.ctor === 'Just') {
+				return _elm_lang$core$Native_Utils.eq(_p12._0, vote.id);
+			} else {
+				return false;
+			}
+		}();
+		return _elm_lang$core$Basics$not(
+			A2(_elm_lang$core$List$member, vote.name, _pcstl$coreo_client$CoreoClient_VoteList$specialWords)) ? A2(
+			_elm_lang$html$Html$li,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('list-group-item clearfix vote-item col-xs-6')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text(
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						':',
-						_elm_lang$core$Basics$toString(vote.votes)))),
-				A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Events$onClick(
-						_pcstl$coreo_client$CoreoClient_VoteList$VoteForOption(vote.id))
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Vote')
-					]))
-			]));
-};
-var _pcstl$coreo_client$CoreoClient_VoteList$voteList = function (vList) {
-	var list = A2(_elm_lang$core$List$map, _pcstl$coreo_client$CoreoClient_VoteList$listElem, vList);
-	return A2(
-		_elm_lang$html$Html$ul,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		list);
-};
+						vote.name,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' : ',
+							_elm_lang$core$Basics$toString(vote.votes)))),
+					A2(
+					_elm_lang$html$Html$span,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('pull-right')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$button,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									(hasVotedForThis || _elm_lang$core$Basics$not(hasVoted)) ? _elm_lang$html$Html_Attributes$class('btn btn-primary') : _elm_lang$html$Html_Attributes$class('btn btn-primary disabled'),
+									_elm_lang$html$Html_Attributes$type$('button'),
+									_elm_lang$html$Html_Events$onClick(
+									_pcstl$coreo_client$CoreoClient_VoteList$VoteForOption(vote.id))
+								]),
+							hasVotedForThis ? _elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Desfazer voto')
+								]) : _elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Vote')
+								]))
+						]))
+				])) : A2(
+			_elm_lang$html$Html$li,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('list-group-item vote-item col-xs-6')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$button,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							(hasVotedForThis || _elm_lang$core$Basics$not(hasVoted)) ? _elm_lang$html$Html_Attributes$class('btn btn-primary-outline') : _elm_lang$html$Html_Attributes$class('btn btn-primary-outline disabled'),
+							_elm_lang$html$Html_Attributes$type$('button'),
+							_elm_lang$html$Html_Events$onClick(
+							_pcstl$coreo_client$CoreoClient_VoteList$VoteForOption(vote.id))
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$img,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$src(wordImg),
+									_elm_lang$html$Html_Attributes$alt(vote.name),
+									_elm_lang$html$Html_Attributes$class('img-responsive')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
+						])),
+					_elm_lang$html$Html$text(
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						' : ',
+						_elm_lang$core$Basics$toString(vote.votes)))
+				]));
+	});
+var _pcstl$coreo_client$CoreoClient_VoteList$voteList = F2(
+	function (model, vList) {
+		var list = A2(
+			_elm_lang$core$List$map,
+			_pcstl$coreo_client$CoreoClient_VoteList$listElem(model),
+			vList);
+		return A2(
+			_elm_lang$html$Html$ul,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('list-group row vote-list')
+				]),
+			list);
+	});
 var _pcstl$coreo_client$CoreoClient_VoteList$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -9412,7 +9533,9 @@ var _pcstl$coreo_client$CoreoClient_VoteList$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_pcstl$coreo_client$CoreoClient_VoteList$voteList(
+				A2(
+				_pcstl$coreo_client$CoreoClient_VoteList$voteList,
+				model,
 				A2(
 					_elm_lang$core$List$sortBy,
 					function (a) {
@@ -9591,11 +9714,33 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$UpdateListSucceed = function (a)
 var _pcstl$coreo_client$CoreoClient_NewWordList$UpdateListFail = function (a) {
 	return {ctor: 'UpdateListFail', _0: a};
 };
+var _pcstl$coreo_client$CoreoClient_NewWordList$NewContent = function (a) {
+	return {ctor: 'NewContent', _0: a};
+};
+var _pcstl$coreo_client$CoreoClient_NewWordList$CreateOptionSucceed = function (a) {
+	return {ctor: 'CreateOptionSucceed', _0: a};
+};
+var _pcstl$coreo_client$CoreoClient_NewWordList$CreateOptionFail = function (a) {
+	return {ctor: 'CreateOptionFail', _0: a};
+};
 var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 	function (message, model) {
 		var _p11 = message;
 		switch (_p11.ctor) {
 			case 'FetchList':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A3(
+						_elm_lang$core$Task$perform,
+						_pcstl$coreo_client$CoreoClient_NewWordList$UpdateListFail,
+						_pcstl$coreo_client$CoreoClient_NewWordList$UpdateListSucceed,
+						A2(
+							_evancz$elm_http$Http$get,
+							_pcstl$coreo_client$CoreoClient_NewWordList$decodeNewWordList(model.votes),
+							model.url))
+				};
+			case 'ResetFetchList':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
@@ -9657,21 +9802,89 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 				}
 			case 'CreateOption':
 				var _p14 = _p11._0;
+				var payload = A2(
+					_elm_lang$core$Json_Encode$encode,
+					1,
+					_elm_lang$core$Json_Encode$object(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{
+								ctor: '_Tuple2',
+								_0: 'new_word',
+								_1: _elm_lang$core$Json_Encode$object(
+									_elm_lang$core$Native_List.fromArray(
+										[
+											{
+											ctor: '_Tuple2',
+											_0: 'name',
+											_1: _elm_lang$core$Json_Encode$string(_p14)
+										},
+											{
+											ctor: '_Tuple2',
+											_0: 'votes',
+											_1: _elm_lang$core$Json_Encode$int(0)
+										}
+										]))
+							}
+							])));
 				var options = A2(
 					_elm_lang$core$List$map,
 					function (_) {
 						return _.name;
 					},
 					model.votes);
-				return A2(_elm_lang$core$List$member, _p14, options) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
+				if (A2(_elm_lang$core$List$member, _p14, options) || _elm_lang$core$Native_Utils.eq(
+					_elm_lang$core$String$length(_p14),
+					0)) {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				} else {
+					var httpRequest = A2(
+						_evancz$elm_http$Http$send,
+						_evancz$elm_http$Http$defaultSettings,
+						{
+							verb: 'POST',
+							headers: _elm_lang$core$Native_List.fromArray(
+								[
+									{ctor: '_Tuple2', _0: 'Accept', _1: 'application/json'},
+									{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'}
+								]),
+							url: model.url,
+							body: _evancz$elm_http$Http$string(payload)
+						});
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: A3(
+							_elm_lang$core$Task$perform,
+							_pcstl$coreo_client$CoreoClient_NewWordList$CreateOptionFail,
+							_pcstl$coreo_client$CoreoClient_NewWordList$CreateOptionSucceed,
+							A2(
+								_evancz$elm_http$Http$fromJson,
+								_pcstl$coreo_client$CoreoClient_NewWordList$decodeNewWordResponse(
+									_elm_lang$core$Native_List.fromArray(
+										[])),
+								httpRequest))
+					};
+				}
+			case 'CreateOptionFail':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_elm_lang$core$Debug$log,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'got err ',
+							_elm_lang$core$Basics$toString(_p11._0)),
+						model),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'CreateOptionSucceed':
+				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							votes: A2(
-								_elm_lang$core$List_ops['::'],
-								A4(_pcstl$coreo_client$CoreoClient_NewWordList$NewWordVotes, 99, _p14, 1, true),
-								model.votes),
+							votes: A2(_elm_lang$core$List_ops['::'], _p11._0, model.votes),
 							fieldContent: ''
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
@@ -9802,12 +10015,10 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
-var _pcstl$coreo_client$CoreoClient_NewWordList$NewContent = function (a) {
-	return {ctor: 'NewContent', _0: a};
-};
 var _pcstl$coreo_client$CoreoClient_NewWordList$CreateOption = function (a) {
 	return {ctor: 'CreateOption', _0: a};
 };
+var _pcstl$coreo_client$CoreoClient_NewWordList$ResetFetchList = {ctor: 'ResetFetchList'};
 var _pcstl$coreo_client$CoreoClient_NewWordList$FetchList = {ctor: 'FetchList'};
 var _pcstl$coreo_client$CoreoClient_NewWordList$VoteForOption = function (a) {
 	return {ctor: 'VoteForOption', _0: a};
@@ -9817,7 +10028,9 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$listElem = function (vote) {
 	return A2(
 		_elm_lang$html$Html$li,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
+			[
+				_elm_lang$html$Html_Attributes$class('list-group-item clearfix vote-item col-xs-6')
+			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$html$Html$text(
@@ -9826,24 +10039,41 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$listElem = function (vote) {
 					vote.name,
 					A2(_elm_lang$core$Basics_ops['++'], ':', voteText))),
 				A2(
-				_elm_lang$html$Html$button,
+				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(
-						_pcstl$coreo_client$CoreoClient_NewWordList$VoteForOption(vote.id))
+						_elm_lang$html$Html_Attributes$class('pull-right')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text('Vote')
+						A2(
+						_elm_lang$html$Html$button,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('btn btn-primary'),
+								_elm_lang$html$Html_Attributes$type$('button'),
+								_elm_lang$html$Html_Events$onClick(
+								_pcstl$coreo_client$CoreoClient_NewWordList$VoteForOption(vote.id))
+							]),
+						vote.voted ? _elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Desfazer voto')
+							]) : _elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Vote')
+							]))
 					]))
 			]));
 };
 var _pcstl$coreo_client$CoreoClient_NewWordList$voteList = function (nvList) {
+	var list = A2(_elm_lang$core$List$map, _pcstl$coreo_client$CoreoClient_NewWordList$listElem, nvList);
 	return A2(
 		_elm_lang$html$Html$ul,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(_elm_lang$core$List$map, _pcstl$coreo_client$CoreoClient_NewWordList$listElem, nvList));
+			[
+				_elm_lang$html$Html_Attributes$class('list-group row vote-list')
+			]),
+		list);
 };
 var _pcstl$coreo_client$CoreoClient_NewWordList$view = function (model) {
 	return A2(
@@ -9852,35 +10082,63 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_pcstl$coreo_client$CoreoClient_NewWordList$voteList(model.votes),
 				A2(
-				_elm_lang$html$Html$input,
+				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Attributes$placeholder('Crie uma opção'),
-						_elm_lang$html$Html_Events$onInput(_pcstl$coreo_client$CoreoClient_NewWordList$NewContent),
-						_elm_lang$html$Html_Attributes$value(model.fieldContent)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[])),
-				A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$type$('button'),
-						_elm_lang$html$Html_Events$onClick(
-						_pcstl$coreo_client$CoreoClient_NewWordList$CreateOption(model.fieldContent))
+						_elm_lang$html$Html_Attributes$class('center-block')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text('Confirmar opção')
-					]))
+						A2(
+						_elm_lang$html$Html$form,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('form-inline')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('form-group')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										A2(
+										_elm_lang$html$Html$input,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$placeholder('Crie uma opção'),
+												_elm_lang$html$Html_Events$onInput(_pcstl$coreo_client$CoreoClient_NewWordList$NewContent),
+												_elm_lang$html$Html_Attributes$value(model.fieldContent)
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[])),
+										A2(
+										_elm_lang$html$Html$button,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$type$('button'),
+												_elm_lang$html$Html_Attributes$class('btn btn-secondary'),
+												_elm_lang$html$Html_Events$onClick(
+												_pcstl$coreo_client$CoreoClient_NewWordList$CreateOption(model.fieldContent))
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html$text('Confirmar opção')
+											]))
+									]))
+							]))
+					])),
+				_pcstl$coreo_client$CoreoClient_NewWordList$voteList(model.votes)
 			]));
 };
 
-var _pcstl$coreo_client$CoreoClient$socketUrl = 'wss://salty-sierra-37096.herokuapp.com/socket/websocket';
-var _pcstl$coreo_client$CoreoClient$newWordsUrl = 'https://salty-sierra-37096.herokuapp.com/api/v1/new_words/';
-var _pcstl$coreo_client$CoreoClient$wordsUrl = 'https://salty-sierra-37096.herokuapp.com/api/v1/words/';
+var _pcstl$coreo_client$CoreoClient$socketUrl = 'ws://localhost:4000/socket/websocket';
+var _pcstl$coreo_client$CoreoClient$newWordsUrl = 'http://localhost:4000/api/v1/new_words/';
+var _pcstl$coreo_client$CoreoClient$wordsUrl = 'http://localhost:4000/api/v1/words/';
 var _pcstl$coreo_client$CoreoClient$Model = F5(
 	function (a, b, c, d, e) {
 		return {voteList: a, newWordList: b, socket: c, socketUrl: d, updatesChannel: e};
@@ -9891,6 +10149,18 @@ var _pcstl$coreo_client$CoreoClient$RejoinChannel = function (a) {
 };
 var _pcstl$coreo_client$CoreoClient$PhoenixMsg = function (a) {
 	return {ctor: 'PhoenixMsg', _0: a};
+};
+var _pcstl$coreo_client$CoreoClient$ResetFetchWords = function (a) {
+	return {ctor: 'ResetFetchWords', _0: a};
+};
+var _pcstl$coreo_client$CoreoClient$FetchWords = function (a) {
+	return {ctor: 'FetchWords', _0: a};
+};
+var _pcstl$coreo_client$CoreoClient$ResetFetchNewWords = function (a) {
+	return {ctor: 'ResetFetchNewWords', _0: a};
+};
+var _pcstl$coreo_client$CoreoClient$FetchNewWords = function (a) {
+	return {ctor: 'FetchNewWords', _0: a};
 };
 var _pcstl$coreo_client$CoreoClient$FetchLists = function (a) {
 	return {ctor: 'FetchLists', _0: a};
@@ -9920,21 +10190,41 @@ var _pcstl$coreo_client$CoreoClient$init = function () {
 				_fbonetti$elm_phoenix_socket$Phoenix_Channel$init('updates:lobby'))));
 	var initSocket = A4(
 		_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-		'update:invalidate_all',
+		'update:invalidate_new_words_votes',
 		'updates:lobby',
-		_pcstl$coreo_client$CoreoClient$FetchLists,
+		_pcstl$coreo_client$CoreoClient$ResetFetchNewWords,
 		A4(
 			_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-			'update:new_word',
+			'update:invalidate_new_words',
 			'updates:lobby',
-			_pcstl$coreo_client$CoreoClient$NewWordUpdate,
+			_pcstl$coreo_client$CoreoClient$FetchNewWords,
 			A4(
 				_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-				'update:word',
+				'update:invalidate_words_votes',
 				'updates:lobby',
-				_pcstl$coreo_client$CoreoClient$WordUpdate,
-				_fbonetti$elm_phoenix_socket$Phoenix_Socket$withDebug(
-					_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_pcstl$coreo_client$CoreoClient$socketUrl)))));
+				_pcstl$coreo_client$CoreoClient$ResetFetchWords,
+				A4(
+					_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
+					'update:invalidate_words',
+					'updates:lobby',
+					_pcstl$coreo_client$CoreoClient$FetchWords,
+					A4(
+						_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
+						'update:invalidate_all',
+						'updates:lobby',
+						_pcstl$coreo_client$CoreoClient$FetchLists,
+						A4(
+							_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
+							'update:new_word',
+							'updates:lobby',
+							_pcstl$coreo_client$CoreoClient$NewWordUpdate,
+							A4(
+								_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
+								'update:word',
+								'updates:lobby',
+								_pcstl$coreo_client$CoreoClient$WordUpdate,
+								_fbonetti$elm_phoenix_socket$Phoenix_Socket$withDebug(
+									_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_pcstl$coreo_client$CoreoClient$socketUrl)))))))));
 	var _p0 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, initSocket);
 	var socket = _p0._0;
 	var phxCmd = _p0._1;
@@ -10001,13 +10291,73 @@ var _pcstl$coreo_client$CoreoClient$update = F2(
 								A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$NewWordMsg, wordListCmd)
 							]))
 				};
+			case 'FetchNewWords':
+				var _p8 = A2(_pcstl$coreo_client$CoreoClient_NewWordList$update, _pcstl$coreo_client$CoreoClient_NewWordList$FetchList, model.newWordList);
+				var newWordList = _p8._0;
+				var wordListCmd = _p8._1;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{newWordList: newWordList}),
+					_1: _elm_lang$core$Platform_Cmd$batch(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$NewWordMsg, wordListCmd)
+							]))
+				};
+			case 'FetchWords':
+				var _p9 = A2(_pcstl$coreo_client$CoreoClient_VoteList$update, _pcstl$coreo_client$CoreoClient_VoteList$FetchList, model.voteList);
+				var newVoteList = _p9._0;
+				var voteListCmd = _p9._1;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{voteList: newVoteList}),
+					_1: _elm_lang$core$Platform_Cmd$batch(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$VoteMsg, voteListCmd)
+							]))
+				};
+			case 'ResetFetchNewWords':
+				var _p10 = A2(_pcstl$coreo_client$CoreoClient_NewWordList$update, _pcstl$coreo_client$CoreoClient_NewWordList$ResetFetchList, model.newWordList);
+				var newWordList = _p10._0;
+				var wordListCmd = _p10._1;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{newWordList: newWordList}),
+					_1: _elm_lang$core$Platform_Cmd$batch(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$NewWordMsg, wordListCmd)
+							]))
+				};
+			case 'ResetFetchWords':
+				var _p11 = A2(_pcstl$coreo_client$CoreoClient_VoteList$update, _pcstl$coreo_client$CoreoClient_VoteList$ResetFetchList, model.voteList);
+				var newVoteList = _p11._0;
+				var voteListCmd = _p11._1;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{voteList: newVoteList}),
+					_1: _elm_lang$core$Platform_Cmd$batch(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$VoteMsg, voteListCmd)
+							]))
+				};
 			case 'WordUpdate':
-				var _p8 = A2(
+				var _p12 = A2(
 					_pcstl$coreo_client$CoreoClient_VoteList$update,
 					_pcstl$coreo_client$CoreoClient_VoteList$WordUpdate(_p3._0),
 					model.voteList);
-				var newVoteList = _p8._0;
-				var voteListCmd = _p8._1;
+				var newVoteList = _p12._0;
+				var voteListCmd = _p12._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10016,12 +10366,12 @@ var _pcstl$coreo_client$CoreoClient$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$VoteMsg, voteListCmd)
 				};
 			case 'NewWordUpdate':
-				var _p9 = A2(
+				var _p13 = A2(
 					_pcstl$coreo_client$CoreoClient_NewWordList$update,
 					_pcstl$coreo_client$CoreoClient_NewWordList$NewWordUpdate(_p3._0),
 					model.newWordList);
-				var newWordList = _p9._0;
-				var wordListCmd = _p9._1;
+				var newWordList = _p13._0;
+				var wordListCmd = _p13._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10030,9 +10380,9 @@ var _pcstl$coreo_client$CoreoClient$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$NewWordMsg, wordListCmd)
 				};
 			case 'PhoenixMsg':
-				var _p10 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p3._0, model.socket);
-				var phxSocket = _p10._0;
-				var phxCmd = _p10._1;
+				var _p14 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p3._0, model.socket);
+				var phxSocket = _p14._0;
+				var phxCmd = _p14._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10041,9 +10391,9 @@ var _pcstl$coreo_client$CoreoClient$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_client$CoreoClient$PhoenixMsg, phxCmd)
 				};
 			case 'RejoinChannel':
-				var _p11 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, model.updatesChannel, model.socket);
-				var socket = _p11._0;
-				var phxCmd = _p11._1;
+				var _p15 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, model.updatesChannel, model.socket);
+				var socket = _p15._0;
+				var phxCmd = _p15._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10056,9 +10406,9 @@ var _pcstl$coreo_client$CoreoClient$update = F2(
 					_fbonetti$elm_phoenix_socket$Phoenix_Push$withPayload,
 					_elm_lang$core$Json_Encode$string('ping-response'),
 					A2(_fbonetti$elm_phoenix_socket$Phoenix_Push$init, 'ping', 'updates:lobby'));
-				var _p12 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, ping, model.socket);
-				var socket = _p12._0;
-				var phxCmd = _p12._1;
+				var _p16 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, ping, model.socket);
+				var socket = _p16._0;
+				var phxCmd = _p16._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10079,6 +10429,12 @@ var _pcstl$coreo_client$CoreoClient$view = function (model) {
 				_elm_lang$html$Html_App$map,
 				_pcstl$coreo_client$CoreoClient$VoteMsg,
 				_pcstl$coreo_client$CoreoClient_VoteList$view(model.voteList)),
+				A2(
+				_elm_lang$html$Html$hr,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
 				A2(
 				_elm_lang$html$Html_App$map,
 				_pcstl$coreo_client$CoreoClient$NewWordMsg,
@@ -10101,7 +10457,7 @@ var _pcstl$coreo_client$CoreoClient$subscriptions = function (model) {
 				A2(
 				_elm_lang$core$Time$every,
 				5 * _elm_lang$core$Time$second,
-				function (_p13) {
+				function (_p17) {
 					return _pcstl$coreo_client$CoreoClient$Ping;
 				})
 			]));
