@@ -23,13 +23,13 @@ import Time
 
 --url for the words API
 wordsUrl : String
-wordsUrl = "http://localhost:4000/api/v1/words/"
+wordsUrl = "https://salty-sierra-37096.herokuapp.com/api/v1/words/"
 
 newWordsUrl : String
-newWordsUrl = "http://localhost:4000/api/v1/new_words/"
+newWordsUrl = "https://salty-sierra-37096.herokuapp.com/api/v1/new_words/"
 
 socketUrl : String
-socketUrl = "ws://localhost:4000/socket/websocket"
+socketUrl = "wss://salty-sierra-37096.herokuapp.com/socket/websocket"
 
 {-| main: Start the client.
 -}
