@@ -9167,12 +9167,17 @@ var _pcstl$coreo_client$CoreoClient_VoteList$wordImages = _elm_lang$core$Dict$fr
 			{ctor: '_Tuple2', _0: 'Leve', _1: '/images/leve.png'},
 			{ctor: '_Tuple2', _0: 'Rápido', _1: '/images/rapido.png'},
 			{ctor: '_Tuple2', _0: 'Volta', _1: '/images/volta.png'},
-			{ctor: '_Tuple2', _0: 'Pause', _1: '/images/pause.png'},
-			{ctor: '_Tuple2', _0: 'Livre', _1: '/images/livre.png'},
-			{ctor: '_Tuple2', _0: 'Contido', _1: '/images/contido.png'}
+			{ctor: '_Tuple2', _0: 'Pausa', _1: '/images/pause.png'},
+			{ctor: '_Tuple2', _0: 'Fluido', _1: '/images/livre.png'},
+			{ctor: '_Tuple2', _0: 'Contido', _1: '/images/contido.png'},
+			{ctor: '_Tuple2', _0: 'Lento', _1: '/images/lento.png'}
 		]));
 var _pcstl$coreo_client$CoreoClient_VoteList$specialWords = _elm_lang$core$Native_List.fromArray(
 	['Forte', 'Leve', 'Lento', 'Rápido', 'Volta', 'Pause', 'Livre', 'Contido']);
+var _pcstl$coreo_client$CoreoClient_VoteList$listOrder = F2(
+	function (a, b) {
+		return A2(_elm_lang$core$List$member, a.name, _pcstl$coreo_client$CoreoClient_VoteList$specialWords) ? (A2(_elm_lang$core$List$member, b.name, _pcstl$coreo_client$CoreoClient_VoteList$specialWords) ? A2(_elm_lang$core$Basics$compare, a.name, b.name) : _elm_lang$core$Basics$GT) : (A2(_elm_lang$core$List$member, b.name, _pcstl$coreo_client$CoreoClient_VoteList$specialWords) ? _elm_lang$core$Basics$LT : A2(_elm_lang$core$Basics$compare, a.name, b.name));
+	});
 var _pcstl$coreo_client$CoreoClient_VoteList$Model = F3(
 	function (a, b, c) {
 		return {votes: a, votedForOption: b, url: c};
@@ -9438,18 +9443,11 @@ var _pcstl$coreo_client$CoreoClient_VoteList$listElem = F2(
 			_elm_lang$html$Html$li,
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_elm_lang$html$Html_Attributes$class('list-group-item clearfix vote-item col-xs-6')
+					_elm_lang$html$Html_Attributes$class('list-group-item clearfix vote-item col-xs-6 col-sm-4')
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_elm_lang$html$Html$text(
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						vote.name,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							' : ',
-							_elm_lang$core$Basics$toString(vote.votes)))),
+					_elm_lang$html$Html$text(vote.name),
 					A2(
 					_elm_lang$html$Html$span,
 					_elm_lang$core$Native_List.fromArray(
@@ -9462,7 +9460,7 @@ var _pcstl$coreo_client$CoreoClient_VoteList$listElem = F2(
 							_elm_lang$html$Html$button,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									(hasVotedForThis || _elm_lang$core$Basics$not(hasVoted)) ? _elm_lang$html$Html_Attributes$class('btn btn-primary') : _elm_lang$html$Html_Attributes$class('btn btn-primary disabled'),
+									hasVotedForThis ? _elm_lang$html$Html_Attributes$class('btn btn-primary voted') : (_elm_lang$core$Basics$not(hasVoted) ? _elm_lang$html$Html_Attributes$class('btn btn-primary') : _elm_lang$html$Html_Attributes$class('btn btn-primary disabled')),
 									_elm_lang$html$Html_Attributes$type$('button'),
 									_elm_lang$html$Html_Events$onClick(
 									_pcstl$coreo_client$CoreoClient_VoteList$VoteForOption(vote.id))
@@ -9479,7 +9477,7 @@ var _pcstl$coreo_client$CoreoClient_VoteList$listElem = F2(
 			_elm_lang$html$Html$li,
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_elm_lang$html$Html_Attributes$class('list-group-item vote-item col-xs-6')
+					_elm_lang$html$Html_Attributes$class('list-group-item vote-item col-xs-6 col-sm-4')
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
@@ -9487,7 +9485,7 @@ var _pcstl$coreo_client$CoreoClient_VoteList$listElem = F2(
 					_elm_lang$html$Html$button,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							(hasVotedForThis || _elm_lang$core$Basics$not(hasVoted)) ? _elm_lang$html$Html_Attributes$class('btn btn-primary-outline') : _elm_lang$html$Html_Attributes$class('btn btn-primary-outline disabled'),
+							hasVotedForThis ? _elm_lang$html$Html_Attributes$class('btn btn-primary-outline voted') : (_elm_lang$core$Basics$not(hasVoted) ? _elm_lang$html$Html_Attributes$class('btn btn-primary-outline') : _elm_lang$html$Html_Attributes$class('btn btn-primary-outline disabled')),
 							_elm_lang$html$Html_Attributes$type$('button'),
 							_elm_lang$html$Html_Events$onClick(
 							_pcstl$coreo_client$CoreoClient_VoteList$VoteForOption(vote.id))
@@ -9504,12 +9502,7 @@ var _pcstl$coreo_client$CoreoClient_VoteList$listElem = F2(
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[]))
-						])),
-					_elm_lang$html$Html$text(
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						' : ',
-						_elm_lang$core$Basics$toString(vote.votes)))
+						]))
 				]));
 	});
 var _pcstl$coreo_client$CoreoClient_VoteList$voteList = F2(
@@ -9536,12 +9529,7 @@ var _pcstl$coreo_client$CoreoClient_VoteList$view = function (model) {
 				A2(
 				_pcstl$coreo_client$CoreoClient_VoteList$voteList,
 				model,
-				A2(
-					_elm_lang$core$List$sortBy,
-					function (a) {
-						return _elm_lang$core$Basics$negate(a.votes);
-					},
-					model.votes))
+				A2(_elm_lang$core$List$sortWith, _pcstl$coreo_client$CoreoClient_VoteList$listOrder, model.votes))
 			]));
 };
 
@@ -9649,6 +9637,7 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$init = function (url) {
 	};
 	return {ctor: '_Tuple2', _0: initModel, _1: initCmds};
 };
+var _pcstl$coreo_client$CoreoClient_NewWordList$strMax = 30;
 var _pcstl$coreo_client$CoreoClient_NewWordList$Model = F3(
 	function (a, b, c) {
 		return {votes: a, fieldContent: b, url: c};
@@ -9890,13 +9879,16 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NewContent':
-				return {
+				var _p15 = _p11._0;
+				return (_elm_lang$core$Native_Utils.cmp(
+					_elm_lang$core$String$length(_p15),
+					_pcstl$coreo_client$CoreoClient_NewWordList$strMax) < 1) ? {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{fieldContent: _p11._0}),
+						{fieldContent: _p15}),
 					_1: _elm_lang$core$Platform_Cmd$none
-				};
+				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'UpdateListFail':
 				return {
 					ctor: '_Tuple2',
@@ -9910,7 +9902,7 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateListSucceed':
-				var _p15 = _p11._0;
+				var _p16 = _p11._0;
 				return {
 					ctor: '_Tuple2',
 					_0: A2(
@@ -9918,10 +9910,10 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							'got nwList ',
-							_elm_lang$core$Basics$toString(_p15)),
+							_elm_lang$core$Basics$toString(_p16)),
 						_elm_lang$core$Native_Utils.update(
 							model,
-							{votes: _p15})),
+							{votes: _p16})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'IncrementFail':
@@ -9937,35 +9929,6 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'IncrementSucceed':
-				var _p16 = _p11._0;
-				return {
-					ctor: '_Tuple2',
-					_0: A2(
-						_elm_lang$core$Debug$log,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'got vote ',
-							_elm_lang$core$Basics$toString(_p16)),
-						_elm_lang$core$Native_Utils.update(
-							model,
-							{
-								votes: A3(_pcstl$coreo_client$CoreoClient_NewWordList$dispatchAction, _pcstl$coreo_client$CoreoClient_NewWordList$toggleAndModify, _p16.id, model.votes)
-							})),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'DecrementFail':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(
-						_elm_lang$core$Debug$log,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'got err ',
-							_elm_lang$core$Basics$toString(_p11._0)),
-						model),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'DecrementSucceed':
 				var _p17 = _p11._0;
 				return {
 					ctor: '_Tuple2',
@@ -9982,11 +9945,40 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'DecrementFail':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_elm_lang$core$Debug$log,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'got err ',
+							_elm_lang$core$Basics$toString(_p11._0)),
+						model),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'DecrementSucceed':
+				var _p18 = _p11._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_elm_lang$core$Debug$log,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'got vote ',
+							_elm_lang$core$Basics$toString(_p18)),
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								votes: A3(_pcstl$coreo_client$CoreoClient_NewWordList$dispatchAction, _pcstl$coreo_client$CoreoClient_NewWordList$toggleAndModify, _p18.id, model.votes)
+							})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'NewWordUpdate':
 				var data = A2(_elm_lang$core$Json_Decode$decodeValue, _pcstl$coreo_client$CoreoClient_NewWordList$decodeIncompleteVote, _p11._0);
-				var _p18 = data;
-				if (_p18.ctor === 'Ok') {
-					var _p19 = _p18._0;
+				var _p19 = data;
+				if (_p19.ctor === 'Ok') {
+					var _p20 = _p19._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -9995,8 +9987,8 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 								votes: A3(
 									_pcstl$coreo_client$CoreoClient_NewWordList$dispatchAction,
 									_elm_lang$core$Basics$always(
-										A2(_pcstl$coreo_client$CoreoClient_NewWordList$completeSingleVote, model.votes, _p19)),
-									_p19.id,
+										A2(_pcstl$coreo_client$CoreoClient_NewWordList$completeSingleVote, model.votes, _p20)),
+									_p20.id,
 									model.votes)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
@@ -10006,7 +9998,7 @@ var _pcstl$coreo_client$CoreoClient_NewWordList$update = F2(
 						ctor: '_Tuple2',
 						_0: A2(
 							_elm_lang$core$Debug$log,
-							A2(_elm_lang$core$Basics_ops['++'], 'got err ', _p18._0),
+							A2(_elm_lang$core$Basics_ops['++'], 'got err ', _p19._0),
 							model),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};

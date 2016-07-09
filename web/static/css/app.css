@@ -108,9 +108,14 @@ form.link, form.button {
     background: none;
 }
 
-.btn-primary-outline .disabled {
+.btn-primary-outline.disabled {
     opacity: 0.5;
 }
+
+.btn-primary-outline.voted {
+    background: rgba(255,255,255,0.1);
+}
+
 
 .btn-primary-outline:hover {
     background: rgba(255,255,255,0.1);
