@@ -32,13 +32,15 @@ import Phoenix.Push
 
 import Debug
 
-{- TODO: Connect to server -}
+strMax : Int
+strMax = 30
 
 {-| Underlying data for the NewWordList-} 
 type alias Model = 
   { votes : List NewWordVotes
   , fieldContent : String 
   , url : String
+--, visible : Bool
 {-  , socket : Phoenix.Socket.Socket Msg
   , socketUrl : String-}
   }
@@ -91,6 +93,7 @@ init url {-socketUrl-} =
       { votes = []
       , fieldContent = ""
       , url = url
+--    , visible = False
 {-      , socket = socket
       , socketUrl = socketUrl-}
       }
@@ -184,7 +187,10 @@ update message model =
       )
 
     NewContent str ->
-      ({ model | fieldContent = str }, Cmd.none)
+      if String.length str <= strMax then
+        ({ model | fieldContent = str }, Cmd.none)
+      else
+        ( model, Cmd.none )
 
     UpdateListFail err ->
       (Debug.log ("got err " ++ (toString err)) model

@@ -223,7 +223,7 @@ button. -}
 view : Model -> Html Msg
 view model = 
   H.div []
-     [ voteList model (List.sortBy (\a -> negate a.votes) model.votes) ]
+     [ voteList model (List.sortWith listOrder model.votes) ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -256,15 +256,18 @@ listElem model vote =
   in if not <| vote.name `List.member` specialWords
     then
        H.li 
-          [ Attr.class "list-group-item clearfix vote-item col-xs-6" ]
-            [ H.text (vote.name ++ " : " ++ (toString vote.votes))
+          [ Attr.class "list-group-item clearfix vote-item col-xs-6 col-sm-4" ]
+            [ H.text vote.name
             , H.span 
                 [ Attr.class "pull-right" ]
                 [ H.button
-                    [ (if (hasVotedForThis || (not hasVoted)) then
-                         Attr.class "btn btn-primary"
-                       else
-                         Attr.class "btn btn-primary disabled"
+                    [ (if hasVotedForThis then
+                         Attr.class "btn btn-primary voted"
+                       else 
+                         if (not hasVoted) then
+                           Attr.class "btn btn-primary"
+                         else
+                           Attr.class "btn btn-primary disabled"
                       )
                     , Attr.type' "button"
                     , Events.onClick (VoteForOption vote.id) 
@@ -278,12 +281,15 @@ listElem model vote =
             ]
     else
       H.li
-         [ Attr.class "list-group-item vote-item col-xs-6" ]
+         [ Attr.class "list-group-item vote-item col-xs-6 col-sm-4" ]
          [ H.button 
-             [ (if (hasVotedForThis || (not hasVoted)) then
-                  Attr.class "btn btn-primary-outline"
-                else
-                  Attr.class "btn btn-primary-outline disabled"
+             [ (if hasVotedForThis then
+                  Attr.class "btn btn-primary-outline voted"
+                else 
+                  if (not hasVoted) then
+                    Attr.class "btn btn-primary-outline"
+                  else
+                    Attr.class "btn btn-primary-outline disabled"
                )
              , Attr.type' "button"
              , Events.onClick (VoteForOption vote.id) 
@@ -294,7 +300,6 @@ listElem model vote =
                  , Attr.class "img-responsive"
                  ] []
              ]
-         , H.text (" : " ++ (toString vote.votes))
          ]
 
 
@@ -311,6 +316,20 @@ increment x = x + 1
 
 decrement x = x - 1
 --
+
+listOrder : Votes -> Votes -> Order
+listOrder a b =
+  if a.name `List.member` specialWords then
+    if b.name `List.member` specialWords then
+      compare a.name b.name
+    else
+      GT
+  else
+    if b.name `List.member` specialWords then
+      LT
+    else
+      compare a.name b.name
+
 
 --decoders for JSON data
 
