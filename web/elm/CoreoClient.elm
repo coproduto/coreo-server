@@ -209,7 +209,7 @@ update message model =
          )
 
     GetVideoFail err ->
-      ( Debug.log ("got err " ++ (toString err)) model
+      ( Debug.log ("video: got err " ++ (toString err)) model
       , Cmd.none
       )
 
@@ -224,7 +224,7 @@ update message model =
         )
 
     SetVideo json ->
-      let data = Decode.decodeValue decodeVideo json
+      let data = Decode.decodeValue decodeVCode json
       in case data of
            Ok code ->
              ( { model | videoUrl = Just code }
@@ -273,7 +273,7 @@ videoFrame src =
     [ Attr.class "embed-responsive embed-responsive-16by9" ]
     [ H.iframe
         [ Attr.class "embed-responsive-item"
-        , Attr.src ("http://youtube-nocookie.com/embed/"++src)
+        , Attr.src ("http://youtube.com/embed/"++src)
         ] 
         []
     ]
@@ -294,6 +294,10 @@ placeholderView =
     ]
 
 --json decoders
+
+decodeVCode : Decoder String
+decodeVCode =
+  "code" := Decode.string
 
 decodeVideo : Decoder String
 decodeVideo =
