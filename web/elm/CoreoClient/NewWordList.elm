@@ -117,7 +117,7 @@ update message model =
       )
 
     ResetFetchList ->
-      ( model
+      ( { model | votes = List.map (\x -> { x | voted = False }) model.votes }
       , Task.perform UpdateListFail UpdateListSucceed 
           (Http.get (decodeNewWordList []) model.url)
       )

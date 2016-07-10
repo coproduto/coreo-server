@@ -2,9 +2,12 @@ defmodule CoreoServer.V1.AdminController do
   use CoreoServer.Web, :controller
 
   def most_voted do
-    words = Repo.all(CoreoServer.Word)
+    {:ok, words} = Repo.transaction(fn ->
+      Repo.all(CoreoServer.Word)
+    end)
 
-    sorted = Enum.sort_by(words, fn(word) -> word.votes end)
+    sorted = Enum.sort_by(words, fn(word) -> -word.votes end)
+    IO.inspect sorted
 
     first = List.first(sorted)
     
@@ -33,11 +36,13 @@ defmodule CoreoServer.V1.AdminController do
     case lock_result do
       {:ok, lock_state} ->
         if lock_state do
+	  winner = most_voted
+
+          CoreoServer.UpdateChannel.broadcast_end_voting(winner)
           Repo.transaction(fn ->
             Repo.update_all(CoreoServer.Word, set: [votes: 0])
           end)
-          CoreoServer.UpdateChannel.broadcast_end_voting(most_voted)
-          CoreoServer.UpdateChannel.broadcast_words_invalidate(true)
+          CoreoServer.UpdateChannel.broadcast_words_invalidate
         else
           CoreoServer.UpdateChannel.broadcast_start_voting
         end
