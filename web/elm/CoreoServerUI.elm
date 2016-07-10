@@ -337,7 +337,9 @@ view : Model -> Html Msg
 view model = 
   H.div [] [ videoForm model
            , H.button
-              [ Events.onClick ToggleWListLock ]
+              [ Events.onClick ToggleWListLock 
+              , Attr.class "btn btn-primary"
+              ]
               [ H.text (if model.isWListLocked
                         then "Iniciar votação"
                         else "Encerrar votação"
@@ -345,16 +347,18 @@ view model =
               ]
            , App.map VoteListMsg <| VoteList.view model.voteList
            , H.button
-              [ Events.onClick ToggleNWListLock ]
+              [ Events.onClick ToggleNWListLock 
+              , Attr.class "btn btn-primary"
+              ]
               [ H.text (if model.isNWListLocked
                         then "Desbloquear criação de novas palavras"
                         else "Bloquear criação de novas palavras"
                        )
               ]
            , App.map NewWordMsg <| NewWordList.view model.newWordList
-           , H.div [] [ H.text ("Tempo até a próxima atualização: " ++ 
-                                  (toString model.remainingTime))
-                      ]
+{-           , H.div [] [ H.text ("Tempo até a próxima atualização: " ++ 
+                                 (toString model.remainingTime))
+                      ]-}
 {-           , H.button 
                [ Events.onClick ShouldUpdate ] 
                [ H.text "Atualizar agora" ]-}

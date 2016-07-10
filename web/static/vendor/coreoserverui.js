@@ -9649,7 +9649,9 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$listElem = function (vote) {
 	return A2(
 		_elm_lang$html$Html$li,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
+			[
+				_elm_lang$html$Html_Attributes$class('list-group-item clearfix col-xs-6')
+			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$html$Html$text(
@@ -9658,18 +9660,28 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$listElem = function (vote) {
 					vote.name,
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						':',
+						':\t',
 						_elm_lang$core$Basics$toString(vote.votes)))),
 				A2(
-				_elm_lang$html$Html$button,
+				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(
-						_pcstl$coreo_server$CoreoServerUI_VoteList$RemoveWord(vote.id))
+						_elm_lang$html$Html_Attributes$class('pull-right')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text('Remover')
+						A2(
+						_elm_lang$html$Html$button,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Events$onClick(
+								_pcstl$coreo_server$CoreoServerUI_VoteList$RemoveWord(vote.id)),
+								_elm_lang$html$Html_Attributes$class('btn btn-secondary')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Remover')
+							]))
 					]))
 			]));
 };
@@ -9678,7 +9690,9 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$voteList = function (vList) {
 	return A2(
 		_elm_lang$html$Html$ul,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
+			[
+				_elm_lang$html$Html_Attributes$class('list-group row ')
+			]),
 		list);
 };
 var _pcstl$coreo_server$CoreoServerUI_VoteList$ResetSucceed = function (a) {
@@ -9724,7 +9738,8 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$view = function (model) {
 				_elm_lang$html$Html$button,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI_VoteList$ResetList)
+						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI_VoteList$ResetList),
+						_elm_lang$html$Html_Attributes$class('btn btn-primary')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -9972,7 +9987,9 @@ var _pcstl$coreo_server$CoreoServerUI_NewWordList$listElem = function (vote) {
 	return A2(
 		_elm_lang$html$Html$li,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
+			[
+				_elm_lang$html$Html_Attributes$class('list-group-item clearfix col-xs-6')
+			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$html$Html$text(
@@ -9984,15 +10001,26 @@ var _pcstl$coreo_server$CoreoServerUI_NewWordList$listElem = function (vote) {
 						':',
 						_elm_lang$core$Basics$toString(vote.votes)))),
 				A2(
-				_elm_lang$html$Html$button,
+				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(
-						_pcstl$coreo_server$CoreoServerUI_NewWordList$RemoveWord(vote.id))
+						_elm_lang$html$Html_Attributes$class('pull-right')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text('Remover')
+						A2(
+						_elm_lang$html$Html$button,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Events$onClick(
+								_pcstl$coreo_server$CoreoServerUI_NewWordList$RemoveWord(vote.id)),
+								_elm_lang$html$Html_Attributes$type$('button'),
+								_elm_lang$html$Html_Attributes$class('btn btn-secondary')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Remover')
+							]))
 					]))
 			]));
 };
@@ -10001,7 +10029,9 @@ var _pcstl$coreo_server$CoreoServerUI_NewWordList$voteList = function (vList) {
 	return A2(
 		_elm_lang$html$Html$ul,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
+			[
+				_elm_lang$html$Html_Attributes$class('list-group row')
+			]),
 		list);
 };
 var _pcstl$coreo_server$CoreoServerUI_NewWordList$view = function (model) {
@@ -10031,7 +10061,9 @@ var _pcstl$coreo_server$CoreoServerUI_NewWordList$view = function (model) {
 				_elm_lang$html$Html$button,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI_NewWordList$ResetList)
+						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI_NewWordList$ResetList),
+						_elm_lang$html$Html_Attributes$type$('button'),
+						_elm_lang$html$Html_Attributes$class('btn btn-primary')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -10730,7 +10762,8 @@ var _pcstl$coreo_server$CoreoServerUI$view = function (model) {
 				_elm_lang$html$Html$button,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI$ToggleWListLock)
+						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI$ToggleWListLock),
+						_elm_lang$html$Html_Attributes$class('btn btn-primary')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -10745,7 +10778,8 @@ var _pcstl$coreo_server$CoreoServerUI$view = function (model) {
 				_elm_lang$html$Html$button,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI$ToggleNWListLock)
+						_elm_lang$html$Html_Events$onClick(_pcstl$coreo_server$CoreoServerUI$ToggleNWListLock),
+						_elm_lang$html$Html_Attributes$class('btn btn-primary')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -10755,19 +10789,7 @@ var _pcstl$coreo_server$CoreoServerUI$view = function (model) {
 				A2(
 				_elm_lang$html$Html_App$map,
 				_pcstl$coreo_server$CoreoServerUI$NewWordMsg,
-				_pcstl$coreo_server$CoreoServerUI_NewWordList$view(model.newWordList)),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'Tempo até a próxima atualização: ',
-							_elm_lang$core$Basics$toString(model.remainingTime)))
-					]))
+				_pcstl$coreo_server$CoreoServerUI_NewWordList$view(model.newWordList))
 			]));
 };
 var _pcstl$coreo_server$CoreoServerUI$subscriptions = function (model) {
