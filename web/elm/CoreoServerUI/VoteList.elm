@@ -1,4 +1,4 @@
-module CoreoServerUI.VoteList exposing (Model, Msg(FetchList, WordUpdate), update, view, init, subscriptions)
+module CoreoServerUI.VoteList exposing (Model, Msg(FetchList, WordUpdate, SetWord), update, view, init, subscriptions)
 
 import Html as H exposing (Html)
 import Html.Attributes as Attr
@@ -36,6 +36,7 @@ type Msg
   | RemoveFail Http.Error
   | RemoveSucceed ()
   | WordUpdate Json.Value
+  | SetWord String
   | NoOp
 
 
@@ -118,7 +119,6 @@ update message model =
                    
              in
                ( { model | votes = sorted
-                         , currentWord = mostVoted sorted
                  }
                , Cmd.none
                )
@@ -126,6 +126,9 @@ update message model =
              ( (Debug.log ("got err " ++ err) model)
              , Cmd.none
              )
+
+    SetWord word ->
+      ( { model | currentWord = word }, Cmd.none )
 
     NoOp ->
       (model, Cmd.none)
