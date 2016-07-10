@@ -1,4 +1,4 @@
-module CoreoClient.VoteList exposing (Model, Msg(FetchList, ResetFetchList, WordUpdate), update, view, init, subscriptions)
+module CoreoClient.VoteList exposing (Model, Msg(FetchList, ResetFetchList, WordUpdate, Lock, Unlock), update, view, init, subscriptions)
 {-| Module to generate a list of votes,
 consisting of each votable option together
 with the number of votes associated with it.
@@ -38,6 +38,7 @@ type alias Model =
     { votes : List Votes
     , votedForOption : Maybe Int
     , url : String
+    , isLocked : Bool
 {-    , socket : Phoenix.Socket.Socket Msg
     , socketUrl : String-}
     }
@@ -57,6 +58,8 @@ type Msg = VoteForOption Int
          | DecrementFail Http.Error
          | DecrementSucceed Votes
 --         | PhoenixMsg (Phoenix.Socket.Msg Msg)
+         | Lock
+         | Unlock
          | WordUpdate Json.Value
          | NoOp
 
@@ -102,6 +105,7 @@ init url {-socketUrl-} =
         { votes = []
         , votedForOption = Nothing
         , url = url
+        , isLocked = True
         }
 
       initCmds =
@@ -201,6 +205,12 @@ update message model =
         , Cmd.map PhoenixMsg phxCmd
         )-}
 
+    Lock ->
+      ( { model | isLocked = True }, Cmd.none )
+
+    Unlock ->
+      ( Debug.log "vlist model" { model | isLocked = False }, Cmd.none )
+
     WordUpdate json ->
       let data = Decode.decodeValue decodeVote json
       in case data of
@@ -264,7 +274,7 @@ listElem model vote =
                     [ (if hasVotedForThis then
                          Attr.class "btn btn-primary voted"
                        else 
-                         if (not hasVoted) then
+                         if not (hasVoted || model.isLocked) then
                            Attr.class "btn btn-primary"
                          else
                            Attr.class "btn btn-primary disabled"
@@ -286,7 +296,7 @@ listElem model vote =
              [ (if hasVotedForThis then
                   Attr.class "btn btn-primary-outline voted"
                 else 
-                  if (not hasVoted) then
+                  if not (hasVoted || model.isLocked) then
                     Attr.class "btn btn-primary-outline"
                   else
                     Attr.class "btn btn-primary-outline disabled"

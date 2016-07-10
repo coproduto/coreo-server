@@ -23,8 +23,12 @@ defmodule CoreoServer.UpdateChannel do
     CoreoServer.Endpoint.broadcast(@channel_topic, "update:new_word", payload)
   end
 
-  def broadcast_all_invalidate do
-    CoreoServer.Endpoint.broadcast(@channel_topic, "update:invalidate_all", %{})
+  def broadcast_all_invalidate(reset_votes? \\ false) do
+    if reset_votes? do
+      CoreoServer.Endpoint.broadcast(@channel_topic, "update:invalidate_all_votes", %{})      
+    else
+      CoreoServer.Endpoint.broadcast(@channel_topic, "update:invalidate_all", %{})
+    end
   end
 
   def broadcast_words_invalidate(reset_votes? \\ false) do
