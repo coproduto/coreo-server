@@ -3,7 +3,16 @@ defmodule CoreoServer.V1.AdminController do
 
   def lock_new_words(conn, _params) do
     CoreoServer.ConfigManager.toggle(CoreoServer.ConfigManager, :lock_new_words)
-    send_resp(conn, 200, "{}")
+
+    lock_result = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_new_words)
+
+    case lock_result do
+      {:ok, lock_state} ->
+        CoreoServer.UpdateChannel.broadcast_lock_state(lock_state)
+        send_resp(conn, 200, "{}")
+      _ ->
+        send_resp(conn, 500, "{}")
+    end
   end
 
   def set_video(conn, %{"video" => video_params}) do

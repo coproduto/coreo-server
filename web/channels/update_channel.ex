@@ -51,6 +51,14 @@ defmodule CoreoServer.UpdateChannel do
     CoreoServer.Endpoint.broadcast(@channel_topic, "update:video", payload)
   end
 
+  def broadcast_lock_state(state) do
+    payload = %{
+      "data" => %{ "state" => state }
+    }
+
+    CoreoServer.Endpoint.broadcast(@channel_topic, "update:lock", payload)
+  end
+
   def join("updates:lobby", payload, socket) do
     if authorized?(payload) do
       {:ok, socket}

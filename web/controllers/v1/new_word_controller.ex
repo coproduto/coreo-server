@@ -10,6 +10,20 @@ defmodule CoreoServer.V1.NewWordController do
     render(conn, "index.json", new_words: new_words)
   end
 
+  def lock_state(conn, _params) do
+    result = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_new_words)
+
+    case result do
+      {:ok, state} when is_boolean(state) ->
+	conn
+	|> put_resp_content_type("application/json")
+	|> send_resp(200, "{ \"data\": { \"state\": #{state} } }")
+      _ ->
+	send_resp(conn, 500, "")
+    end
+  end
+
+
   def create(conn, %{"new_word" => new_word_params}) do
     {_, is_locked} = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_new_words)
 

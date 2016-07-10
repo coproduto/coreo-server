@@ -58,6 +58,7 @@ type alias Model =
     , socketUrl : String
     , updatesChannel : Phoenix.Channel.Channel Msg
     , videoUrl : Maybe String
+    , isNWListLocked : Bool
     }
 
 type Msg 
@@ -74,7 +75,10 @@ type Msg
     | RejoinChannel Json.Value
     | GetVideoFail Http.Error
     | GetVideoSucceed String
+    | LockStateFail Http.Error
+    | LockStateSucceed Bool
     | SetVideo Json.Value
+    | SetLock Json.Value
     | Ping
 
 init : (Model, Cmd Msg)
@@ -93,6 +97,7 @@ init =
                  |> Phoenix.Socket.on "update:invalidate_new_words" "updates:lobby" FetchNewWords
                  |> Phoenix.Socket.on "update:invalidate_new_words_votes" "updates:lobby" ResetFetchNewWords
                  |> Phoenix.Socket.on "update:video" "updates:lobby" SetVideo
+                 |> Phoenix.Socket.on "update:lock" "updates:lobby" SetLock
 
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
@@ -104,18 +109,24 @@ init =
       videoCmd = Task.perform GetVideoFail GetVideoSucceed
                  (Http.get decodeVideo getVideoUrl)
 
+      lockCmd = Task.perform LockStateFail LockStateSucceed
+                  ( Http.get decodeLockState (newWordsUrl++"lock_state/") )
+      
+
   in ( { voteList = newVoteList
        , newWordList = newWordList
        , socket = socket
        , socketUrl = socketUrl
        , updatesChannel = channel
        , videoUrl = Nothing
+       , isNWListLocked = True
        }
      , Cmd.batch
          [ Cmd.map VoteMsg voteListCmd
          , Cmd.map NewWordMsg wordListCmd
          , Cmd.map PhoenixMsg phxCmd
          , videoCmd
+         , lockCmd
          ]
      )
 
@@ -235,6 +246,27 @@ update message model =
              , Cmd.none
              )
 
+    LockStateFail err ->
+      (Debug.log ("lockstate: got err " ++ (toString err)) model
+      , Cmd.none
+      )
+
+    LockStateSucceed value ->
+      ( { model | isNWListLocked = value }, Cmd.none )
+
+    SetLock json ->
+      let data = Decode.decodeValue decodeLockState json
+      in case data of
+           Ok state ->
+             ( { model | isNWListLocked = state }
+             , Cmd.none
+             )
+             
+           Err str ->
+             ( Debug.log str model
+             , Cmd.none
+             )
+
     Ping -> 
       let ping = Phoenix.Push.init "ping" "updates:lobby"
                |> Phoenix.Push.withPayload (Json.string "ping-response")
@@ -254,7 +286,10 @@ view model =
                placeholderView 
          , App.map VoteMsg <| VoteList.view model.voteList
          , H.hr [] []
-         , App.map NewWordMsg <| NewWordList.view model.newWordList
+         , if not <| model.isNWListLocked then 
+             App.map NewWordMsg <| NewWordList.view model.newWordList
+           else
+             H.div [] []
          ]
 
 
@@ -302,3 +337,8 @@ decodeVCode =
 decodeVideo : Decoder String
 decodeVideo =
   "data" := ( "code" := Decode.string )
+
+decodeLockState : Decoder Bool
+decodeLockState =
+  "data" := ( "state" := Decode.bool )
+
