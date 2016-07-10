@@ -9633,6 +9633,9 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$init = function (url) {
 	};
 };
 var _pcstl$coreo_server$CoreoServerUI_VoteList$NoOp = {ctor: 'NoOp'};
+var _pcstl$coreo_server$CoreoServerUI_VoteList$SetWord = function (a) {
+	return {ctor: 'SetWord', _0: a};
+};
 var _pcstl$coreo_server$CoreoServerUI_VoteList$WordUpdate = function (a) {
 	return {ctor: 'WordUpdate', _0: a};
 };
@@ -9884,10 +9887,7 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$update = F2(
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{
-								votes: sorted,
-								currentWord: _pcstl$coreo_server$CoreoServerUI_VoteList$mostVoted(sorted)
-							}),
+							{votes: sorted}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
@@ -9900,6 +9900,14 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
+			case 'SetWord':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentWord: _p4._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			default:
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
@@ -10223,6 +10231,7 @@ var _pcstl$coreo_server$CoreoServerUI_NewWordList$update = F2(
 	});
 var _pcstl$coreo_server$CoreoServerUI_NewWordList$FetchList = {ctor: 'FetchList'};
 
+var _pcstl$coreo_server$CoreoServerUI$decodeWinner = A2(_elm_lang$core$Json_Decode_ops[':='], 'winner', _elm_lang$core$Json_Decode$string);
 var _pcstl$coreo_server$CoreoServerUI$decodeLockState = A2(
 	_elm_lang$core$Json_Decode_ops[':='],
 	'data',
@@ -10257,6 +10266,9 @@ var _pcstl$coreo_server$CoreoServerUI$Model = function (a) {
 var _pcstl$coreo_server$CoreoServerUI$Ping = {ctor: 'Ping'};
 var _pcstl$coreo_server$CoreoServerUI$NewContent = function (a) {
 	return {ctor: 'NewContent', _0: a};
+};
+var _pcstl$coreo_server$CoreoServerUI$SetCurrentWord = function (a) {
+	return {ctor: 'SetCurrentWord', _0: a};
 };
 var _pcstl$coreo_server$CoreoServerUI$WLockStateSucceed = function (a) {
 	return {ctor: 'WLockStateSucceed', _0: a};
@@ -10378,41 +10390,46 @@ var _pcstl$coreo_server$CoreoServerUI$init = function () {
 			_fbonetti$elm_phoenix_socket$Phoenix_Channel$init('updates:lobby')));
 	var initSocket = A4(
 		_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-		'update:invalidate_new_words_votes',
+		'update:end_voting',
 		'updates:lobby',
-		_pcstl$coreo_server$CoreoServerUI$FetchNewWords,
+		_pcstl$coreo_server$CoreoServerUI$SetCurrentWord,
 		A4(
 			_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-			'update:invalidate_words_votes',
+			'update:invalidate_new_words_votes',
 			'updates:lobby',
-			_pcstl$coreo_server$CoreoServerUI$FetchWords,
+			_pcstl$coreo_server$CoreoServerUI$FetchNewWords,
 			A4(
 				_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-				'update:invalidate_words',
+				'update:invalidate_words_votes',
 				'updates:lobby',
 				_pcstl$coreo_server$CoreoServerUI$FetchWords,
 				A4(
 					_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-					'update:invalidate_new_words',
+					'update:invalidate_words',
 					'updates:lobby',
-					_pcstl$coreo_server$CoreoServerUI$FetchNewWords,
+					_pcstl$coreo_server$CoreoServerUI$FetchWords,
 					A4(
 						_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-						'update:invalidate_all',
+						'update:invalidate_new_words',
 						'updates:lobby',
-						_pcstl$coreo_server$CoreoServerUI$FetchLists,
+						_pcstl$coreo_server$CoreoServerUI$FetchNewWords,
 						A4(
 							_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-							'update:new_word',
+							'update:invalidate_all',
 							'updates:lobby',
-							_pcstl$coreo_server$CoreoServerUI$NewWordUpdate,
+							_pcstl$coreo_server$CoreoServerUI$FetchLists,
 							A4(
 								_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
-								'update:word',
+								'update:new_word',
 								'updates:lobby',
-								_pcstl$coreo_server$CoreoServerUI$WordUpdate,
-								_fbonetti$elm_phoenix_socket$Phoenix_Socket$withDebug(
-									_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_pcstl$coreo_server$CoreoServerUI$socketUrl)))))))));
+								_pcstl$coreo_server$CoreoServerUI$NewWordUpdate,
+								A4(
+									_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
+									'update:word',
+									'updates:lobby',
+									_pcstl$coreo_server$CoreoServerUI$WordUpdate,
+									_fbonetti$elm_phoenix_socket$Phoenix_Socket$withDebug(
+										_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_pcstl$coreo_server$CoreoServerUI$socketUrl))))))))));
 	var _p0 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, initSocket);
 	var socket = _p0._0;
 	var phxCmd = _p0._1;
@@ -10722,10 +10739,34 @@ var _pcstl$coreo_server$CoreoServerUI$update = F2(
 						{isWListLocked: _p3._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'SetCurrentWord':
+				var data = A2(_elm_lang$core$Json_Decode$decodeValue, _pcstl$coreo_server$CoreoServerUI$decodeWinner, _p3._0);
+				var _p16 = data;
+				if (_p16.ctor === 'Ok') {
+					var _p17 = A2(
+						_pcstl$coreo_server$CoreoServerUI_VoteList$update,
+						_pcstl$coreo_server$CoreoServerUI_VoteList$SetWord(_p16._0),
+						model.voteList);
+					var newVoteList = _p17._0;
+					var vListCmd = _p17._1;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{voteList: newVoteList}),
+						_1: A2(_elm_lang$core$Platform_Cmd$map, _pcstl$coreo_server$CoreoServerUI$VoteListMsg, vListCmd)
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: A2(_elm_lang$core$Debug$log, _p16._0, model),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
 			case 'PhoenixMsg':
-				var _p16 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p3._0, model.socket);
-				var phxSocket = _p16._0;
-				var phxCmd = _p16._1;
+				var _p18 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p3._0, model.socket);
+				var phxSocket = _p18._0;
+				var phxCmd = _p18._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10738,9 +10779,9 @@ var _pcstl$coreo_server$CoreoServerUI$update = F2(
 					_fbonetti$elm_phoenix_socket$Phoenix_Push$withPayload,
 					_elm_lang$core$Json_Encode$string('ping-response'),
 					A2(_fbonetti$elm_phoenix_socket$Phoenix_Push$init, 'ping', 'updates:lobby'));
-				var _p17 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, ping, model.socket);
-				var socket = _p17._0;
-				var phxCmd = _p17._1;
+				var _p19 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, ping, model.socket);
+				var socket = _p19._0;
+				var phxCmd = _p19._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -10808,7 +10849,7 @@ var _pcstl$coreo_server$CoreoServerUI$subscriptions = function (model) {
 				A2(
 				_elm_lang$core$Time$every,
 				5 * _elm_lang$core$Time$second,
-				function (_p18) {
+				function (_p20) {
 					return _pcstl$coreo_server$CoreoServerUI$Ping;
 				})
 			]));

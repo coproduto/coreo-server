@@ -72,6 +72,7 @@ type Msg
   | LockStateSucceed Bool
   | WLockStateFail Http.Error
   | WLockStateSucceed Bool
+  | SetCurrentWord Json.Value
   | NewContent String
   | Ping
 {-  | NewWordVote String
@@ -112,6 +113,7 @@ init =
                  |> Phoenix.Socket.on "update:invalidate_words" "updates:lobby" FetchWords
                  |> Phoenix.Socket.on "update:invalidate_words_votes" "updates:lobby" FetchWords
                  |> Phoenix.Socket.on "update:invalidate_new_words_votes" "updates:lobby" FetchNewWords
+                 |> Phoenix.Socket.on "update:end_voting" "updates:lobby" SetCurrentWord
 
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
@@ -285,6 +287,19 @@ update message model =
     WLockStateSucceed value ->
       ( { model | isWListLocked = value }, Cmd.none )
 
+    SetCurrentWord json ->
+      let data = Decode.decodeValue decodeWinner json
+      in case data of
+           Ok winner ->
+             let (newVoteList, vListCmd) = VoteList.update (VoteList.SetWord winner) model.voteList
+             in 
+               ( { model | voteList = newVoteList }, Cmd.map VoteListMsg vListCmd )
+
+           Err str ->
+             ( Debug.log str model
+             , Cmd.none
+             )                  
+
     PhoenixMsg msg ->
       let
         (phxSocket, phxCmd) = Phoenix.Socket.update msg model.socket
@@ -401,3 +416,7 @@ videoForm model =
 decodeLockState : Decoder Bool
 decodeLockState =
   "data" := ( "state" := Decode.bool )
+
+decodeWinner : Decoder String
+decodeWinner = 
+  "winner" := Decode.string
