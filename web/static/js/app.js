@@ -20,10 +20,32 @@ import "phoenix_html"
 
 // import socket from "./socket"
 
-export var Client = {
+var Admin = {
+    run: function() {
+	const elmAdminDiv = document.querySelector('#elm-container');
+	const elmApp = Elm.CoreoServerUI.embed(elmAdminDiv);
+    }
+}
+
+var Client = {
     run: function() {
 	const elmClientDiv = document.querySelector('#elm-container');
 	const elmApp = Elm.CoreoClient.embed(elmClientDiv);
     }
 }
+
+function handleDOMContentLoaded() {
+    const viewName = document.getElementsByTagName('body')[0].dataset.viewName;
+    
+    if(viewName === "PageIndexView") {
+	Client.run()
+    } else if(viewName === "PageAdminView") {
+	Admin.run()
+    }
+}
+
+window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
+
+
+
 

@@ -11,15 +11,14 @@
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
-  <body>
-    <div class="container">
+  <body data-view-name="<%= js_view_name(@conn, @view_template) %>">
 
       <main role="main">
         <%= render @view_module, @view_template, assigns %>
       </main>
 
       <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
-      <script>require("web/static/js/app").Client.run()</script>
-    </div> <!-- /container -->
+      <!--<script>require("web/static/js/app")</script>-->
+      <!-- /container -->
   </body>
 </html>
