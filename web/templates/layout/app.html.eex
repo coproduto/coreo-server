@@ -12,6 +12,7 @@
   </head>
 
   <body data-view-name="<%= js_view_name(@conn, @view_template) %>">
+    <div class="container">
 
       <main role="main">
         <%= render @view_module, @view_template, assigns %>
@@ -19,6 +20,6 @@
 
       <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
       <!--<script>require("web/static/js/app")</script>-->
-      <!-- /container -->
+    </div> <!-- /container -->
   </body>
 </html>

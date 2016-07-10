@@ -1,10 +1,10 @@
 {
     "version": "0.1.0",
-    "summary": "Client for a multimedia choreography executed by André Aguiar",
-    "repository": "https://github.com/pcstl/coreo-client.git",
+    "summary": "Server for a multimedia choreography executed by André Aguiar",
+    "repository": "https://github.com/pcstl/coreo-server.git",
     "license": "MIT",
     "source-directories": [
-        "."
+        "."	
     ],
     "exposed-modules": [],
     "dependencies": {
