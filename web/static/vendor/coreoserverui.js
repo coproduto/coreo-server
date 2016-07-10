@@ -9787,10 +9787,7 @@ var _pcstl$coreo_server$CoreoServerUI_VoteList$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{
-							votes: sorted,
-							currentWord: _pcstl$coreo_server$CoreoServerUI_VoteList$mostVoted(sorted)
-						}),
+						{votes: sorted}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'ResetList':
