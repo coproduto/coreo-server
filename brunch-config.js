@@ -52,7 +52,8 @@ exports.config = {
   plugins: {
     elmBrunch: {
 	elmFolder: "web/elm",
-	mainModules: ["CoreoClient.elm"],
+	mainModules: ["CoreoClient.elm", 
+	              "CoreoServerUI.elm"],
 	outputFolder: "../static/vendor"
     },
     babel: {
