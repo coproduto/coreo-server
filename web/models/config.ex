@@ -9,7 +9,7 @@ defmodule CoreoServer.Config do
     timestamps
   end
 
-  @required_fields ~w(is_active lock_new_words)
+  @required_fields ~w(is_active lock_new_words video)
   @optional_fields ~w()
 
   @doc """
