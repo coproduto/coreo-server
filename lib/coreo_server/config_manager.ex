@@ -9,7 +9,7 @@ defmodule CoreoServer.ConfigManager do
 
 ###Default configs
   def default_config do
-    %{ "is_active" => true, "lock_new_words" => true }
+    %{ "is_active" => true, "lock_new_words" => true, "video" => "" }
   end
 
 ###Client API
@@ -99,6 +99,7 @@ defmodule CoreoServer.ConfigManager do
     where: c.id != ^newest.id
 
     CoreoServer.Repo.update_all(old_ones_query, set: [is_active: false])
+    IO.inspect newest.video
     
     newest
   end

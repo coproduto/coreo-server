@@ -15,12 +15,17 @@ import Phoenix.Channel
 import Phoenix.Push
 
 import Json.Encode as Json
+import Json.Decode as Decode exposing (Decoder, (:=))
 
 import Html as H exposing (Html)
 import Html.Attributes as Attr
 import Html.App as App
 
+import Http
+import Task
+
 import Time
+import String
 
 --url for the words API
 wordsUrl : String
@@ -31,6 +36,9 @@ newWordsUrl = "http://localhost:4000/api/v1/new_words/"
 
 socketUrl : String
 socketUrl = "ws://localhost:4000/socket/websocket"
+
+getVideoUrl : String
+getVideoUrl = "http://localhost:4000/api/v1/video"
 
 {-| main: Start the client.
 -}
@@ -64,6 +72,9 @@ type Msg
     | ResetFetchWords Json.Value
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
     | RejoinChannel Json.Value
+    | GetVideoFail Http.Error
+    | GetVideoSucceed String
+    | SetVideo Json.Value
     | Ping
 
 init : (Model, Cmd Msg)
@@ -81,6 +92,7 @@ init =
                  |> Phoenix.Socket.on "update:invalidate_words_votes" "updates:lobby" ResetFetchWords
                  |> Phoenix.Socket.on "update:invalidate_new_words" "updates:lobby" FetchNewWords
                  |> Phoenix.Socket.on "update:invalidate_new_words_votes" "updates:lobby" ResetFetchNewWords
+                 |> Phoenix.Socket.on "update:video" "updates:lobby" SetVideo
 
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
@@ -88,6 +100,9 @@ init =
               |> Phoenix.Channel.onClose RejoinChannel
 
       (socket, phxCmd) = Phoenix.Socket.join channel initSocket
+
+      videoCmd = Task.perform GetVideoFail GetVideoSucceed
+                 (Http.get decodeVideo getVideoUrl)
 
   in ( { voteList = newVoteList
        , newWordList = newWordList
@@ -100,6 +115,7 @@ init =
          [ Cmd.map VoteMsg voteListCmd
          , Cmd.map NewWordMsg wordListCmd
          , Cmd.map PhoenixMsg phxCmd
+         , videoCmd
          ]
      )
 
@@ -192,6 +208,33 @@ update message model =
          , Cmd.map PhoenixMsg phxCmd
          )
 
+    GetVideoFail err ->
+      ( Debug.log ("got err " ++ (toString err)) model
+      , Cmd.none
+      )
+
+    GetVideoSucceed str ->
+      if String.isEmpty str then
+        ( { model | videoUrl = Nothing }
+        , Cmd.none
+        )
+      else
+        ( { model | videoUrl = Just str }
+        , Cmd.none
+        )
+
+    SetVideo json ->
+      let data = Decode.decodeValue decodeVideo json
+      in case data of
+           Ok code ->
+             ( { model | videoUrl = Just code }
+             , Cmd.none
+             )
+           Err str ->
+             ( Debug.log str model
+             , Cmd.none
+             )
+
     Ping -> 
       let ping = Phoenix.Push.init "ping" "updates:lobby"
                |> Phoenix.Push.withPayload (Json.string "ping-response")
@@ -249,3 +292,9 @@ placeholderView =
             []
         ]
     ]
+
+--json decoders
+
+decodeVideo : Decoder String
+decodeVideo =
+  "data" := ( "code" := Decode.string )
