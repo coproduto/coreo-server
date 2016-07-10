@@ -69,6 +69,7 @@ type Msg
     | WordUpdate Json.Value
     | NewWordUpdate Json.Value
     | FetchLists Json.Value
+    | ResetFetchLists Json.Value
     | FetchNewWords Json.Value
     | ResetFetchNewWords Json.Value
     | FetchWords Json.Value
@@ -98,6 +99,7 @@ init =
                  |> Phoenix.Socket.on "update:word" "updates:lobby" WordUpdate
                  |> Phoenix.Socket.on "update:new_word" "updates:lobby" NewWordUpdate
                  |> Phoenix.Socket.on "update:invalidate_all" "updates:lobby" FetchLists
+                 |> Phoenix.Socket.on "update:invalidate_all_votes" "updates:lobby" ResetFetchLists
                  |> Phoenix.Socket.on "update:invalidate_words" "updates:lobby" FetchWords
                  |> Phoenix.Socket.on "update:invalidate_words_votes" "updates:lobby" ResetFetchWords
                  |> Phoenix.Socket.on "update:invalidate_new_words" "updates:lobby" FetchNewWords
@@ -105,7 +107,7 @@ init =
                  |> Phoenix.Socket.on "update:video" "updates:lobby" SetVideo
                  |> Phoenix.Socket.on "update:lock" "updates:lobby" SetLock
                  |> Phoenix.Socket.on "update:end_voting" "updates:lobby" SetWinner
-                 |> Phoenix.Socket.on "update:start_voting" "update:lobby" StartVoting
+                 |> Phoenix.Socket.on "update:start_voting" "updates:lobby" StartVoting
 
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
@@ -140,6 +142,7 @@ init =
          , Cmd.map PhoenixMsg phxCmd
          , videoCmd
          , lockCmd
+         , voteLockCmd
          ]
      )
 
@@ -167,6 +170,20 @@ update message model =
             , Cmd.map NewWordMsg wordListCmd
             ]
         )
+
+    ResetFetchLists _ ->
+      let (newVoteList, voteListCmd) = VoteList.update VoteList.ResetFetchList model.voteList
+          (newWordList, wordListCmd) = NewWordList.update NewWordList.ResetFetchList model.newWordList
+      in 
+        ( { model | voteList = newVoteList
+                  , newWordList = newWordList 
+          }
+        , Cmd.batch
+            [ Cmd.map VoteMsg voteListCmd
+            , Cmd.map NewWordMsg wordListCmd
+            ]
+        )
+
 
     FetchNewWords _ ->
       let (newWordList, wordListCmd) = NewWordList.update NewWordList.FetchList model.newWordList
@@ -265,7 +282,8 @@ update message model =
       )
 
     LockStateSucceed value ->
-      ( { model | isNWListLocked = value }, Cmd.none )
+      ( { model | isNWListLocked = value }
+      , Cmd.none )
 
     VoteStateFail err ->
       (Debug.log ("votestate: got err " ++ (toString err)) model
@@ -273,7 +291,15 @@ update message model =
       )
 
     VoteStateSucceed value ->
-      ( { model | isVotingLocked = value }, Cmd.none )
+      let (newVoteList, voteListCmd) = 
+            if (Debug.log "words lock" value) then
+              VoteList.update VoteList.Lock model.voteList
+            else
+              VoteList.update VoteList.Unlock model.voteList
+      in
+        ( { model | voteList = newVoteList 
+                  , isVotingLocked = value }
+        , Cmd.map VoteMsg voteListCmd )
 
     SetLock json ->
       let data = Decode.decodeValue decodeBooleanState json
@@ -290,12 +316,15 @@ update message model =
              
     SetWinner json ->
       let data = Decode.decodeValue decodeWinner json
+
+          (newVoteList, voteListCmd) = VoteList.update VoteList.Lock model.voteList
       in case data of
            Ok winner ->
              ( { model | isVotingLocked = True 
                        , currentWord = winner
+                       , voteList = newVoteList 
                }
-             , Cmd.none
+             , Cmd.map VoteMsg voteListCmd
              )
      
            Err str ->
@@ -305,9 +334,13 @@ update message model =
 
 
     StartVoting _ ->
-      ( { model | isVotingLocked = False }
-      , Cmd.none
-      )
+      let (newVoteList, voteListCmd) = VoteList.update VoteList.Unlock model.voteList
+      in
+        ( { model | isVotingLocked = False 
+                  , voteList = newVoteList 
+          }
+        , Cmd.map VoteMsg voteListCmd
+        )
 
     Ping -> 
       let ping = Phoenix.Push.init "ping" "updates:lobby"

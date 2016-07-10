@@ -42,7 +42,7 @@ defmodule CoreoServer.V1.AdminController do
           Repo.transaction(fn ->
             Repo.update_all(CoreoServer.Word, set: [votes: 0])
           end)
-          CoreoServer.UpdateChannel.broadcast_words_invalidate
+          CoreoServer.UpdateChannel.broadcast_all_invalidate(true)
         else
           CoreoServer.UpdateChannel.broadcast_start_voting
         end
