@@ -79,10 +79,10 @@ type Msg
   | Tick-}
 
 serverUrl : String
-serverUrl = "http://localhost:4000/"
+serverUrl = "https://salty-sierra-37096.herokuapp.com/"
 
 socketUrl : String
-socketUrl = "ws://localhost:4000/socket/websocket"
+socketUrl = "wss://salty-sierra-37096.herokuapp.com/socket/websocket"
 
 wordsUrl : String
 wordsUrl = serverUrl++"api/v1/words/"

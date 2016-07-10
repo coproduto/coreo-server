@@ -38,7 +38,7 @@ socketUrl : String
 socketUrl = "wss://salty-sierra-37096.herokuapp.com/socket/websocket"
 
 getVideoUrl : String
-getVideoUrl = "http://localhost:4000/api/v1/video"
+getVideoUrl = "http://salty-sierra-37096.herokuapp.com/api/v1/video"
 
 {-| main: Start the client.
 -}

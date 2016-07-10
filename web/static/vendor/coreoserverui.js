@@ -10196,8 +10196,8 @@ var _pcstl$coreo_server$CoreoServerUI$decodeLockState = A2(
 	'data',
 	A2(_elm_lang$core$Json_Decode_ops[':='], 'state', _elm_lang$core$Json_Decode$bool));
 var _pcstl$coreo_server$CoreoServerUI$initialFreq = 60 * _elm_lang$core$Time$second;
-var _pcstl$coreo_server$CoreoServerUI$socketUrl = 'ws://localhost:4000/socket/websocket';
-var _pcstl$coreo_server$CoreoServerUI$serverUrl = 'http://localhost:4000/';
+var _pcstl$coreo_server$CoreoServerUI$socketUrl = 'wss://salty-sierra-37096.herokuapp.com/socket/websocket';
+var _pcstl$coreo_server$CoreoServerUI$serverUrl = 'https://salty-sierra-37096.herokuapp.com/';
 var _pcstl$coreo_server$CoreoServerUI$wordsUrl = A2(_elm_lang$core$Basics_ops['++'], _pcstl$coreo_server$CoreoServerUI$serverUrl, 'api/v1/words/');
 var _pcstl$coreo_server$CoreoServerUI$newWordsUrl = A2(_elm_lang$core$Basics_ops['++'], _pcstl$coreo_server$CoreoServerUI$serverUrl, 'api/v1/new_words/');
 var _pcstl$coreo_server$CoreoServerUI$adminUrl = A2(_elm_lang$core$Basics_ops['++'], _pcstl$coreo_server$CoreoServerUI$serverUrl, 'api/v1/admin/');
