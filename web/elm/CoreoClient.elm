@@ -59,6 +59,8 @@ type alias Model =
     , updatesChannel : Phoenix.Channel.Channel Msg
     , videoUrl : Maybe String
     , isNWListLocked : Bool
+    , isVotingLocked : Bool
+    , currentWord : String
     }
 
 type Msg 
@@ -77,8 +79,12 @@ type Msg
     | GetVideoSucceed String
     | LockStateFail Http.Error
     | LockStateSucceed Bool
+    | VoteStateFail Http.Error
+    | VoteStateSucceed Bool
     | SetVideo Json.Value
     | SetLock Json.Value
+    | SetWinner Json.Value
+    | StartVoting Json.Value
     | Ping
 
 init : (Model, Cmd Msg)
@@ -98,6 +104,8 @@ init =
                  |> Phoenix.Socket.on "update:invalidate_new_words_votes" "updates:lobby" ResetFetchNewWords
                  |> Phoenix.Socket.on "update:video" "updates:lobby" SetVideo
                  |> Phoenix.Socket.on "update:lock" "updates:lobby" SetLock
+                 |> Phoenix.Socket.on "update:end_voting" "updates:lobby" SetWinner
+                 |> Phoenix.Socket.on "update:start_voting" "update:lobby" StartVoting
 
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
@@ -110,7 +118,10 @@ init =
                  (Http.get decodeVideo getVideoUrl)
 
       lockCmd = Task.perform LockStateFail LockStateSucceed
-                  ( Http.get decodeLockState (newWordsUrl++"lock_state/") )
+                  ( Http.get decodeBooleanState (newWordsUrl++"lock_state/") )
+
+      voteLockCmd = Task.perform VoteStateFail VoteStateSucceed
+                      ( Http.get decodeBooleanState (wordsUrl++"lock_state/") )
       
 
   in ( { voteList = newVoteList
@@ -120,6 +131,8 @@ init =
        , updatesChannel = channel
        , videoUrl = Nothing
        , isNWListLocked = True
+       , isVotingLocked = True
+       , currentWord = ""
        }
      , Cmd.batch
          [ Cmd.map VoteMsg voteListCmd
@@ -254,8 +267,16 @@ update message model =
     LockStateSucceed value ->
       ( { model | isNWListLocked = value }, Cmd.none )
 
+    VoteStateFail err ->
+      (Debug.log ("votestate: got err " ++ (toString err)) model
+      , Cmd.none
+      )
+
+    VoteStateSucceed value ->
+      ( { model | isVotingLocked = value }, Cmd.none )
+
     SetLock json ->
-      let data = Decode.decodeValue decodeLockState json
+      let data = Decode.decodeValue decodeBooleanState json
       in case data of
            Ok state ->
              ( { model | isNWListLocked = state }
@@ -266,6 +287,27 @@ update message model =
              ( Debug.log str model
              , Cmd.none
              )
+             
+    SetWinner json ->
+      let data = Decode.decodeValue decodeWinner json
+      in case data of
+           Ok winner ->
+             ( { model | isVotingLocked = True 
+                       , currentWord = winner
+               }
+             , Cmd.none
+             )
+     
+           Err str ->
+             ( Debug.log str model
+             , Cmd.none
+             )
+
+
+    StartVoting _ ->
+      ( { model | isVotingLocked = False }
+      , Cmd.none
+      )
 
     Ping -> 
       let ping = Phoenix.Push.init "ping" "updates:lobby"
@@ -273,7 +315,7 @@ update message model =
           (socket, phxCmd) = Phoenix.Socket.push ping model.socket
       in ( { model | socket = socket }
          , Cmd.map PhoenixMsg phxCmd
-         )      
+         )
     
 
 view : Model -> Html Msg
@@ -338,7 +380,10 @@ decodeVideo : Decoder String
 decodeVideo =
   "data" := ( "code" := Decode.string )
 
-decodeLockState : Decoder Bool
-decodeLockState =
+decodeBooleanState : Decoder Bool
+decodeBooleanState =
   "data" := ( "state" := Decode.bool )
 
+decodeWinner : Decoder String
+decodeWinner = 
+  "winner" := Decode.string

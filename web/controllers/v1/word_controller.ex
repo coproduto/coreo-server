@@ -10,6 +10,20 @@ defmodule CoreoServer.V1.WordController do
     render(conn, "index.json", words: words)
   end
 
+  def lock_state(conn, _params) do
+    result = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_words)
+
+    case result do
+      {:ok, state} when is_boolean(state) ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(200, "{ \"data\": { \"state\": #{state} } }")
+
+      _ ->
+        send_resp(conn, 500, "")
+    end
+  end
+
   def create(conn, %{"word" => word_params}) do
     changeset = Word.changeset(%Word{}, word_params)
 
@@ -96,7 +110,6 @@ defmodule CoreoServer.V1.WordController do
 
     send_resp(conn, :no_content, "")
   end
-
 
   def reset_votes(conn, _params) do
     result = Repo.transaction(fn ->

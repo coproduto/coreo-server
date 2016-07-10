@@ -4,12 +4,13 @@ defmodule CoreoServer.Config do
   schema "configs" do
     field :is_active, :boolean, default: false
     field :lock_new_words, :boolean, default: false
+    field :lock_words, :boolean, default: false
     field :video, :string, default: ""
 
     timestamps
   end
 
-  @required_fields ~w(is_active lock_new_words video)
+  @required_fields ~w(is_active lock_new_words lock_words video)
   @optional_fields ~w()
 
   @doc """
