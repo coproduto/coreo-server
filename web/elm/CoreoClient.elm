@@ -35,10 +35,10 @@ newWordsUrl : String
 newWordsUrl = "https://salty-sierra-37096.herokuapp.com/api/v1/new_words/"
 
 socketUrl : String
-socketUrl = "wss://salty-sierra-37096.herokuapp.com/socket/websocket"
+socketUrl = "wss://salty-sierra-37096.herokuapp.com/socket/websocket/"
 
 getVideoUrl : String
-getVideoUrl = "http://salty-sierra-37096.herokuapp.com/api/v1/video"
+getVideoUrl = "https://salty-sierra-37096.herokuapp.com/api/v1/video/"
 
 {-| main: Start the client.
 -}
@@ -112,19 +112,14 @@ init =
       channel = Phoenix.Channel.init "updates:lobby"
               |> Phoenix.Channel.withPayload (Json.string "")
               |> Phoenix.Channel.onJoin FetchLists
-              |> Phoenix.Channel.onClose RejoinChannel
 
       (socket, phxCmd) = Phoenix.Socket.join channel initSocket
-
-      videoCmd = Task.perform GetVideoFail GetVideoSucceed
-                 (Http.get decodeVideo getVideoUrl)
 
       lockCmd = Task.perform LockStateFail LockStateSucceed
                   ( Http.get decodeBooleanState (newWordsUrl++"lock_state/") )
 
       voteLockCmd = Task.perform VoteStateFail VoteStateSucceed
                       ( Http.get decodeBooleanState (wordsUrl++"lock_state/") )
-      
 
   in ( { voteList = newVoteList
        , newWordList = newWordList
@@ -140,7 +135,6 @@ init =
          [ Cmd.map VoteMsg voteListCmd
          , Cmd.map NewWordMsg wordListCmd
          , Cmd.map PhoenixMsg phxCmd
-         , videoCmd
          , lockCmd
          , voteLockCmd
          ]
@@ -161,6 +155,9 @@ update message model =
     FetchLists _ ->
       let (newVoteList, voteListCmd) = VoteList.update VoteList.FetchList model.voteList
           (newWordList, wordListCmd) = NewWordList.update NewWordList.FetchList model.newWordList
+          videoCmd = Task.perform GetVideoFail GetVideoSucceed
+                       (Http.get decodeVideo getVideoUrl)
+          
       in 
         ( { model | voteList = newVoteList
                   , newWordList = newWordList 
@@ -168,6 +165,7 @@ update message model =
         , Cmd.batch
             [ Cmd.map VoteMsg voteListCmd
             , Cmd.map NewWordMsg wordListCmd
+            , Debug.log "vcmd" videoCmd
             ]
         )
 

@@ -1,3 +1,4 @@
+'debugger;'
 // Brunch automatically concatenates all files in your
 // watched paths. Those paths can be configured at
 // config.paths.watched in "brunch-config.js".
@@ -23,6 +24,7 @@ import "phoenix_html"
 var Admin = {
     run: function() {
 	const elmAdminDiv = document.querySelector('#elm-container');
+	console.log("Embedding elm admin");
 	const elmApp = Elm.CoreoServerUI.embed(elmAdminDiv);
     }
 }
@@ -30,7 +32,9 @@ var Admin = {
 var Client = {
     run: function() {
 	const elmClientDiv = document.querySelector('#elm-container');
+	console.log("Embedding elm client");
 	const elmApp = Elm.CoreoClient.embed(elmClientDiv);
+	console.log("Finished embedding");
     }
 }
 
