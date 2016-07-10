@@ -32,6 +32,10 @@ defmodule CoreoServer.ConfigManager do
     GenServer.cast(server, {:toggle, name})
   end
 
+  def set(server, name, value) do
+    GenServer.cast(server, {:set, name, value})
+  end
+
 ###Server implementation
   def handle_call({:get, name}, _from, config) do
     {:reply, Map.fetch(config, name), config}
@@ -56,6 +60,11 @@ defmodule CoreoServer.ConfigManager do
 	  {:noreply, config}
       end
     end
+  end
+
+  def handle_cast({:set, name, value}, config) do
+    IO.puts "Received cast - request to set #{name} to #{value}"
+    {:noreply, config}
   end
   
 ###Database management

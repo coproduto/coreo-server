@@ -35,6 +35,7 @@ defmodule CoreoServer.Router do
       post "/new_words/reset", NewWordController, :reset_votes
 
       post "/admin/lock_new_words", AdminController, :lock_new_words
+      post "/admin/set_video", AdminController, :set_video
     end
   end
 end

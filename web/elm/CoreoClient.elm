@@ -17,6 +17,7 @@ import Phoenix.Push
 import Json.Encode as Json
 
 import Html as H exposing (Html)
+import Html.Attributes as Attr
 import Html.App as App
 
 import Time
@@ -48,6 +49,7 @@ type alias Model =
     , socket : Phoenix.Socket.Socket Msg
     , socketUrl : String
     , updatesChannel : Phoenix.Channel.Channel Msg
+    , videoUrl : Maybe String
     }
 
 type Msg 
@@ -92,6 +94,7 @@ init =
        , socket = socket
        , socketUrl = socketUrl
        , updatesChannel = channel
+       , videoUrl = Nothing
        }
      , Cmd.batch
          [ Cmd.map VoteMsg voteListCmd
@@ -201,7 +204,12 @@ update message model =
 view : Model -> Html Msg
 view model = 
     H.div []
-         [ App.map VoteMsg <| VoteList.view model.voteList
+         [ case model.videoUrl of
+             Just url ->
+               videoFrame url
+             Nothing ->
+               placeholderView 
+         , App.map VoteMsg <| VoteList.view model.voteList
          , H.hr [] []
          , App.map NewWordMsg <| NewWordList.view model.newWordList
          ]
@@ -215,3 +223,29 @@ subscriptions model =
          , Phoenix.Socket.listen model.socket PhoenixMsg
          , Time.every (5 * Time.second) (\_ -> Ping)
          ]
+
+videoFrame : String -> Html Msg
+videoFrame src =
+  H.div
+    [ Attr.class "embed-responsive embed-responsive-16by9" ]
+    [ H.iframe
+        [ Attr.class "embed-responsive-item"
+        , Attr.src ("http://youtube-nocookie.com/embed/"++src)
+        ] 
+        []
+    ]
+
+placeholderView : Html Msg
+placeholderView =
+  H.div 
+    [ Attr.class "row" ]
+    [ H.div
+        [ Attr.class "col-sm-12 col-sm-offset-0 col-xs-10 col-xs-offset-1" ]
+        [ H.img
+            [ Attr.src "/images/placeholder.png" 
+            , Attr.alt "Ämämä Mämäm"
+            , Attr.class "img-responsive center-block"
+            ] 
+            []
+        ]
+    ]
