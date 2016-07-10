@@ -65,7 +65,6 @@ update message model =
       let sorted = vList |> (List.sortBy (\a -> negate a.votes))
       in
         ( { model | votes = sorted
-          , currentWord = mostVoted sorted
           }
         , Cmd.none
         )
