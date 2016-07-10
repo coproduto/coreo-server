@@ -43,6 +43,14 @@ defmodule CoreoServer.UpdateChannel do
     end
   end
 
+  def broadcast_new_video(code) do
+    payload = %{
+      "code" => code
+    }
+
+    CoreoServer.Endpoint.broadcast(@channel_topic, "update:video", code)
+  end
+
   def join("updates:lobby", payload, socket) do
     if authorized?(payload) do
       {:ok, socket}

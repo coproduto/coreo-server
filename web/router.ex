@@ -36,6 +36,8 @@ defmodule CoreoServer.Router do
 
       post "/admin/lock_new_words", AdminController, :lock_new_words
       post "/admin/set_video", AdminController, :set_video
+
+      get "/video", VideoController, :get_video
     end
   end
 end
