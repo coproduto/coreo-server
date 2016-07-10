@@ -46,9 +46,13 @@ defmodule CoreoServer.ConfigManager do
       {_, previous_value} = Map.fetch(config, name)
       
       params = %{ name => (not previous_value) }
+      IO.puts "parameters"
+      IO.inspect params
       previous_config = get_config
 
       changeset = Config.changeset(previous_config, params)
+      IO.puts "changes"
+      IO.inspect changeset
       
       result = CoreoServer.Repo.transaction( fn ->
 	CoreoServer.Repo.update!(changeset)
@@ -64,7 +68,42 @@ defmodule CoreoServer.ConfigManager do
 
   def handle_cast({:set, name, value}, config) do
     IO.puts "Received cast - request to set #{name} to #{value}"
-    {:noreply, config}
+    if Map.has_key?(config, name) do
+      new_config = Map.put(config, name, value)
+      IO.puts "new config"
+      IO.inspect new_config
+
+      params = %{ name => value }
+      IO.puts "parameters"
+      IO.inspect params
+
+      previous_config = get_config
+      IO.puts "previous"
+      IO.inspect previous_config
+
+      changeset = Config.changeset(previous_config, params)
+      IO.puts "changes"
+      IO.inspect changeset
+
+      result = CoreoServer.Repo.transaction(fn ->
+	CoreoServer.Repo.update!(changeset)
+      end)
+
+      IO.puts "result"
+      IO.inspect result
+
+      case result do
+	{:ok, _res} ->
+	  if name == :video do
+	    CoreoServer.UpdateChannel.broadcast_new_video(value)
+	  end
+	  {:noreply, new_config}
+	{:error, _changeset} ->
+	  {:noreply, config}
+      end
+    else
+      {:noreply, config}
+    end
   end
   
 ###Database management

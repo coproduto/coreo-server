@@ -48,7 +48,7 @@ defmodule CoreoServer.UpdateChannel do
       "code" => code
     }
 
-    CoreoServer.Endpoint.broadcast(@channel_topic, "update:video", code)
+    CoreoServer.Endpoint.broadcast(@channel_topic, "update:video", payload)
   end
 
   def join("updates:lobby", payload, socket) do
