@@ -326,6 +326,10 @@ view model =
                videoFrame url
              Nothing ->
                placeholderView 
+         , if model.isVotingLocked then
+             winnerView model
+           else
+             H.div [] []
          , App.map VoteMsg <| VoteList.view model.voteList
          , H.hr [] []
          , if not <| model.isNWListLocked then 
@@ -354,6 +358,15 @@ videoFrame src =
         ] 
         []
     ]
+
+winnerView : Model -> Html Msg
+winnerView model =
+  if not <| String.isEmpty model.currentWord then
+    H.h2
+       []
+       [ H.text model.currentWord ]
+  else
+    H.div [] []
 
 placeholderView : Html Msg
 placeholderView =

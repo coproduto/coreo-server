@@ -122,7 +122,7 @@ update message model =
       )
 
     ResetFetchList ->
-      ( model
+      ( { model | votedForOption = Nothing }
       , Task.perform UpdateListFail UpdateListResetSucceed 
               (Http.get decodeVoteList model.url)
       )
