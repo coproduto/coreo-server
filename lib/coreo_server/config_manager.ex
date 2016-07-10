@@ -9,7 +9,11 @@ defmodule CoreoServer.ConfigManager do
 
 ###Default configs
   def default_config do
-    %{ "is_active" => true, "lock_new_words" => true, "video" => "" }
+    %{ "is_active" => true, 
+       "lock_new_words" => true, 
+       "lock_words" => true, 
+       "video" => "" 
+    }
   end
 
 ###Client API
@@ -46,13 +50,8 @@ defmodule CoreoServer.ConfigManager do
       {_, previous_value} = Map.fetch(config, name)
       
       params = %{ name => (not previous_value) }
-      IO.puts "parameters"
-      IO.inspect params
       previous_config = get_config
-
       changeset = Config.changeset(previous_config, params)
-      IO.puts "changes"
-      IO.inspect changeset
       
       result = CoreoServer.Repo.transaction( fn ->
 	CoreoServer.Repo.update!(changeset)
@@ -67,30 +66,16 @@ defmodule CoreoServer.ConfigManager do
   end
 
   def handle_cast({:set, name, value}, config) do
-    IO.puts "Received cast - request to set #{name} to #{value}"
     if Map.has_key?(config, name) do
+
       new_config = Map.put(config, name, value)
-      IO.puts "new config"
-      IO.inspect new_config
-
       params = %{ name => value }
-      IO.puts "parameters"
-      IO.inspect params
-
       previous_config = get_config
-      IO.puts "previous"
-      IO.inspect previous_config
-
       changeset = Config.changeset(previous_config, params)
-      IO.puts "changes"
-      IO.inspect changeset
 
       result = CoreoServer.Repo.transaction(fn ->
 	CoreoServer.Repo.update!(changeset)
       end)
-
-      IO.puts "result"
-      IO.inspect result
 
       case result do
 	{:ok, _res} ->

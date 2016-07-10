@@ -59,6 +59,15 @@ defmodule CoreoServer.UpdateChannel do
     CoreoServer.Endpoint.broadcast(@channel_topic, "update:lock", payload)
   end
 
+  def broadcast_start_voting do
+    payload = %{}
+    CoreoServer.Endpoint.broadcast(@channel_topic, "update:start_voting", payload)
+  end
+
+  def broadcast_end_voting(winner) do
+    CoreoServer.Endpoint.broadcast(@channel_topic, "update:end_voting", %{ "winner" => winner })
+  end
+
   def join("updates:lobby", payload, socket) do
     if authorized?(payload) do
       {:ok, socket}

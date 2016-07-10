@@ -1,6 +1,16 @@
 defmodule CoreoServer.V1.AdminController do
   use CoreoServer.Web, :controller
 
+  def most_voted do
+    words = Repo.all(CoreoServer.Word)
+
+    sorted = Enum.sort_by(words, fn(word) -> word.votes end)
+
+    first = List.first(sorted)
+    
+    first.name
+  end
+
   def lock_new_words(conn, _params) do
     CoreoServer.ConfigManager.toggle(CoreoServer.ConfigManager, :lock_new_words)
 
@@ -14,6 +24,29 @@ defmodule CoreoServer.V1.AdminController do
         send_resp(conn, 500, "{}")
     end
   end
+
+  def lock_words(conn, _params) do
+    CoreoServer.ConfigManager.toggle(CoreoServer.ConfigManager, :lock_words)
+
+    lock_result = CoreoServer.ConfigManager.get(CoreoServer.ConfigManager, :lock_words)
+
+    case lock_result do
+      {:ok, lock_state} ->
+        if lock_state do
+          Repo.transaction(fn ->
+            Repo.update_all(CoreoServer.Word, set: [votes: 0])
+          end)
+          CoreoServer.UpdateChannel.broadcast_end_voting(most_voted)
+          CoreoServer.UpdateChannel.broadcast_words_invalidate(true)
+        else
+          CoreoServer.UpdateChannel.broadcast_start_voting
+        end
+        send_resp(conn, 200, "{}")
+      _ ->
+        send_resp(conn, 500, "{}")
+    end
+  end
+    
 
   def set_video(conn, %{"video" => video_params}) do
     case video_params do

@@ -24,6 +24,7 @@ defmodule CoreoServer.Router do
     pipe_through :api
 
     scope "/v1", V1, as: :v1 do
+      get  "/words/lock_state", WordController, :lock_state
       resources "/words", WordController, except: [:edit, :new]
       post "/words/increment/:id", WordController, :increment
       post "/words/decrement/:id", WordController, :decrement
@@ -36,6 +37,7 @@ defmodule CoreoServer.Router do
       post "/new_words/reset", NewWordController, :reset_votes
 
       post "/admin/lock_new_words", AdminController, :lock_new_words
+      post "/admin/lock_words", AdminController, :lock_words
       post "/admin/set_video", AdminController, :set_video
 
       get "/video", VideoController, :get_video
